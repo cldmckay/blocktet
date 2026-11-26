@@ -38,8 +38,13 @@
   .hdr-right { display: flex; gap: 8px; align-items: center; }
   #scoreBtn {
     background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 1px 2px rgba(20,30,60,.06);
-    padding: 6px 14px; display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; min-width: 108px;
+    padding: 6px 12px; display: flex; align-items: stretch; gap: 12px; line-height: 1.1;
   }
+  #scoreBtn .col { display: flex; flex-direction: column; align-items: flex-end; min-width: 52px; }
+  #scoreBtn .col + .col { border-left: 1px solid var(--line); padding-left: 12px; }
+  #best { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--muted); }
+  #scoreBtn .togo { font-size: 10px; color: var(--muted); font-weight: 600; margin-top: 1px; }
+  #scoreBtn.beating #best, #scoreBtn.beating .toplbl { color: var(--gold); }
   #scoreBtn small { white-space: nowrap; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
   #score { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; transition: transform .15s, color .15s; }
   #score.bump { transform: scale(1.18); color: var(--accent); }
@@ -66,7 +71,7 @@
   .cell.drop .in { animation: drop .22s ease-out; }
   @keyframes drop { from { transform: scale(.7); } to { transform: scale(1); } }
   #frame {
-    position: absolute; left: 0; top: 0; border: 2px solid #c3cbdb; border-radius: 10px; pointer-events: none;
+    display: none; position: absolute; left: 0; top: 0; border: 2px solid #c3cbdb; border-radius: 10px; pointer-events: none;
   }
   #ghosts { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
   .ghost { position: absolute; border-radius: 20%; opacity: .55; }
@@ -121,6 +126,9 @@
   .helper svg { width: 16px; height: 16px; }
   #status { width: var(--size); text-align: center; font-size: 13px; font-weight: 700; color: var(--danger); display: none; }
   #status.show { display: block; }
+  #status.over { color: var(--text); }
+  .card .saved { color: #2e7d32; font-weight: 700; font-size: 13px; }
+  .linkbtn { margin-top: 12px; background: none; border: 0; color: var(--muted); font-size: 13px; text-decoration: underline; }
 
   #modeBadge {
     white-space: nowrap; font-style: normal; font-size: 11px; font-weight: 800; letter-spacing: .5px; vertical-align: middle;
@@ -135,12 +143,13 @@
   .card .sub { font-size: 13px; margin: 8px 0 6px; }
   .card .empty { margin: 16px 0; }
   .lvl-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .card .blurb { color: var(--text); font-size: 14px; line-height: 1.45; margin: 8px 4px; }
   .lvl {
     display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 8px 2px; border-radius: 12px;
     border: 1px solid var(--line); background: color-mix(in srgb, #43a047 calc((1 - var(--t)) * 14%), color-mix(in srgb, #e5484d calc(var(--t) * 16%), #fff));
   }
   .lvl:hover { border-color: var(--accent); }
-  .lvl b { font-size: 20px; line-height: 1.1; }
+  .lvl b { font-size: 13px; line-height: 1.3; }
   .lvl span { font-size: 10px; font-weight: 700; }
   .lvl small { font-size: 9px; color: var(--muted); }
   .crazy-btn {
@@ -166,6 +175,22 @@
   .card details { text-align: left; margin-top: 10px; font-size: 13px; }
   .card summary { cursor: pointer; font-weight: 700; color: var(--muted); }
   .btn.start { min-width: 120px; }
+
+  .cell.junk .in {
+    background: repeating-linear-gradient(135deg, #b4bbc8 0 4px, #a3abbb 4px 8px);
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,.14), inset 0 2px 0 rgba(255,255,255,.3);
+  }
+  /* Stone is drawn as an outlined rock (shape, not colour, tells it apart). */
+  .cell.stone .in, .cell.cracked .in {
+    background: #ece4d3 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 10 8 4.5 15 3.5 20.5 7.5 21 14.5 17 20.5 9 21 3.5 16.5Z' fill='%239aa0aa' stroke='%23262b35' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath d='M8 4.5 15 3.5 13.5 9.5 7 10.5Z' fill='%23d3d7de'/%3E%3Cpath d='M20.5 7.5 21 14.5 15.5 13.5 13.5 9.5Z' fill='%23b4b9c2'/%3E%3Cpath d='M9 21 17 20.5 15.5 13.5 9.5 15Z' fill='%236b717d'/%3E%3Cpath d='M7 10.5 13.5 9.5 15.5 13.5 9.5 15Z' fill='%23a6abb4'/%3E%3Cpath d='M7 10.5 13.5 9.5 15.5 13.5 9.5 15ZM8 4.5 7 10.5 3.5 16.5M15 3.5 13.5 9.5M20.5 7.5 15.5 13.5 17 20.5M9.5 15 9 21' fill='none' stroke='%23262b35' stroke-width='.9' stroke-linejoin='round'/%3E%3Ccircle cx='17.5' cy='10' r='.7' fill='%23262b35'/%3E%3Ccircle cx='6' cy='14' r='.6' fill='%23262b35'/%3E%3Ccircle cx='12' cy='18' r='.6' fill='%23f3f5fa'/%3E%3C/svg%3E") center / 92% no-repeat;
+    box-shadow: inset 0 0 0 2px #262b35;
+  }
+  .cell.cracked .in::after {
+    content: ''; position: absolute; inset: 4%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M11 3.6 12.5 8 10 11.5 13.5 14 11.5 21' fill='none' stroke='%23f3f5fa' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M11 3.6 12.5 8 10 11.5 13.5 14 11.5 21M10 11.5 5 13M13.5 14 19.5 12' fill='none' stroke='%23111' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% no-repeat;
+  }
+  #tray.two { grid-template-columns: repeat(2, 1fr); }
+  .slot.inactive { display: none; }
 
   /* ---------- tray ---------- */
   #tray { width: var(--size); display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -199,6 +224,22 @@
   #lvlPop small { color: var(--muted); font-size: 12px; }
   #lvlPop ul { margin: 8px 0 0; padding: 0 0 0 18px; font-size: 12.5px; color: var(--text); line-height: 1.55; }
   #lvlPop ul:empty { display: none; }
+  #installSheet {
+    position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 12px); transform: translateX(-50%); z-index: 110;
+    width: min(400px, calc(100vw - 20px)); background: #fff; border-radius: 18px; padding: 14px;
+    box-shadow: 0 16px 40px rgba(20,30,60,.3); display: flex; gap: 12px; align-items: flex-start;
+    animation: sheetIn .35s cubic-bezier(.2,.9,.25,1.1);
+  }
+  #installSheet[hidden] { display: none; }
+  #installSheet [hidden] { display: none; }
+  @keyframes sheetIn { from { transform: translate(-50%, 120%); } }
+  #installSheet .is-icon { width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+  #installSheet strong { font-size: 16px; }
+  #installSheet p { margin: 4px 0 8px; font-size: 13.5px; line-height: 1.45; color: var(--text); }
+  #installSheet p svg { width: 16px; height: 16px; vertical-align: -3px; color: var(--accent); }
+  #installSheet .is-btns { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  #installSheet .btn { margin-top: 0; padding: 9px 16px; }
+  #installSheet .linkbtn { margin-top: 0; font-size: 12px; }
   #updateBtn {
     position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 16px); transform: translateX(-50%); z-index: 80;
     display: flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 12px 18px;
@@ -253,8 +294,8 @@
     <div class="title">Block<span>tet</span> <em id="modeBadge">Level 3</em></div>
     <div class="hdr-right">
       <button id="scoreBtn" aria-label="Score — view top scores">
-        <small>Score · Best <span id="best">0</span></small>
-        <span id="score">0</span>
+        <span class="col"><small>Score</small><span id="score">0</span></span>
+        <span class="col"><small class="toplbl" id="topLbl">Top</small><span id="best">0</span></span>
       </button>
       <button class="icon-btn" id="newBtn" aria-label="New game">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
@@ -285,6 +326,18 @@
 
 <div id="toast"></div>
 <div id="lvlPop" role="status"></div>
+<div id="installSheet" role="dialog" aria-labelledby="installTitle" hidden>
+  <img src="icons/icon-192.png" alt="" class="is-icon">
+  <div class="is-body">
+    <strong id="installTitle">Install Blocktet</strong>
+    <p id="installText"></p>
+    <div class="is-btns">
+      <button class="btn" id="installGo" hidden>Install</button>
+      <button class="btn ghostbtn" id="installLater">Not now</button>
+      <button class="linkbtn" id="installNever">Don't show again</button>
+    </div>
+  </div>
+</div>
 <button id="updateBtn" hidden>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
   <span>Update available — tap to update</span>
@@ -294,11 +347,11 @@
 <script>
 (() => {
   // ---------- constants ----------
-  const APP_VERSION = '7';    // keep in sync with version.json and the cache name in sw.js
+  const APP_VERSION = '14';    // keep in sync with version.json and the cache name in sw.js
   const N = 10;               // main play area
-  const M = 1;                // max overhang beyond the main area (one ring)
+  const M = 0;                // no overhang: pieces must fit on the 10x10 board
   const G = N + 2 * M;        // full virtual grid (18)
-  const BASE_VIEW = N + 2;    // main + one gray ring
+  const BASE_VIEW = N;
   const COLORS = ['#ef5350', '#fb8c00', '#fbc02d', '#43a047', '#26a69a', '#1e88e5', '#5c6bc0', '#ab47bc', '#ec407a'];
   const SINGLE_COLOR = '#f5a524';
   // size class: 0 = small (favored when easy), 1 = medium, 2 = big/awkward (favored when hard)
@@ -316,33 +369,55 @@
   // ---------- difficulty levels ----------
   // big: weight multiplier for big/awkward shapes (small shapes get 1/big)
   // helper: lines per helper · star: lines per star · plays: plays a star lasts
-  // previews: how many rack slots show their next piece · ring: overhang ring open
+  // previews: how many rack slots show their next piece
   // single: whether the 1-square piece can appear as a random piece
   const LEVELS = [
-    { name: 'Breezy',     big: 0.5,  helper: 15, star: 8,  plays: 6, previews: 3, ring: true,  single: true },
-    { name: 'Easy',       big: 0.75, helper: 20, star: 10, plays: 5, previews: 3, ring: true,  single: true },
-    { name: 'Relaxed',    big: 1,    helper: 25, star: 10, plays: 5, previews: 3, ring: true,  single: true },
-    { name: 'Steady',     big: 1.25, helper: 30, star: 12, plays: 4, previews: 3, ring: true,  single: true },
-    { name: 'Moderate',   big: 1.5,  helper: 35, star: 12, plays: 4, previews: 2, ring: true,  single: true },
-    { name: 'Tricky',     big: 1.75, helper: 40, star: 15, plays: 3, previews: 2, ring: true,  single: true },
-    { name: 'Tough',      big: 2,    helper: 45, star: 15, plays: 3, previews: 2, ring: true,  single: true },
-    { name: 'Hard',       big: 2.25, helper: 50, star: 18, plays: 3, previews: 1, ring: true,  single: true },
-    { name: 'Brutal',     big: 2.5,  helper: 60, star: 20, plays: 3, previews: 1, ring: false, single: true },
-    { name: 'Impossible', big: 3,    helper: 75, star: 25, plays: 2, previews: 1, ring: false, single: false }
+    { name: 'Breezy',     big: 0.5,  helper: 15, star: 8,  plays: 6, previews: 3, single: true },
+    { name: 'Easy',       big: 0.75, helper: 20, star: 10, plays: 5, previews: 3, single: true },
+    { name: 'Relaxed',    big: 1,    helper: 25, star: 10, plays: 5, previews: 3, single: true },
+    { name: 'Steady',     big: 1.25, helper: 30, star: 12, plays: 4, previews: 3, single: true },
+    { name: 'Moderate',   big: 1.5,  helper: 35, star: 12, plays: 4, previews: 2, single: true },
+    { name: 'Tricky',     big: 1.75, helper: 40, star: 15, plays: 3, previews: 2, single: true },
+    { name: 'Tough',      big: 2,    helper: 45, star: 15, plays: 3, previews: 2, single: true },
+    { name: 'Hard',       big: 2.25, helper: 50, star: 18, plays: 3, previews: 1, single: true },
+    { name: 'Brutal',     big: 2.5,  helper: 60, star: 20, plays: 3, previews: 1, single: true },
+    { name: 'Impossible', big: 3,    helper: 75, star: 25, plays: 2, previews: 1, single: false,
+      rack: 2,                          // only two pieces in the rack
+      garbage: { lines: 2 },            // one garbage block for every 2 lines cleared
+      stone: { lines: 5 } }             // one block turns to stone for every 5 lines cleared
   ];
   const CRAZY_STEP = 10; // lines per notch in Crazy mode
   // Crazy sequence: 1..10, then 2..10, 3..10, … 9..10, then 10 forever.
   const CRAZY_SEQ = [];
   for (let s = 1; s <= 10; s++) for (let l = s; l <= 10; l++) CRAZY_SEQ.push(l);
+  // Player-facing difficulties. Each uses one rung of the 10-step ladder above;
+  // Crazy mode climbs the whole ladder.
+  const MODES = [
+    { id: 'easy',   name: 'Easy',   level: 2,  blurb: 'Plenty of small pieces, every next piece visible, and helpers come often.' },
+    { id: 'medium', name: 'Medium', level: 4,  blurb: 'A balanced mix of pieces with a steady flow of helpers.' },
+    { id: 'hard',   name: 'Hard',   level: 6,  blurb: 'Bigger pieces, fewer previews, and helpers are harder to earn.' },
+    { id: 'pro',    name: 'Pro',    level: 8,  blurb: 'Big, awkward pieces dominate and you only see one piece ahead.' },
+    { id: 'expert', name: 'Expert', level: 10, blurb: 'Only two pieces at a time. A garbage block drops in for every 2 lines you clear, and every 5 lines a block turns to stone that takes two clears to break.' }
+  ];
+  const MODE = Object.fromEntries(MODES.map(m => [m.id, m]));
+  const MODE_IDS = MODES.map(m => m.id).concat('crazy');
   const levelFor = (mode, lines) => mode === 'crazy'
     ? (CRAZY_SEQ[Math.floor(lines / CRAZY_STEP)] || 10)
-    : mode;
-  const modeLabel = m => m === 'crazy' ? 'Crazy mode' : `Level ${m} · ${LEVELS[m - 1].name}`;
+    : (MODE[mode] || MODE.medium).level;
+  const modeName = m => m === 'crazy' ? 'Crazy mode' : (MODE[m] || MODE.medium).name;
+  const modeLabel = modeName;
+  const LEGACY_MODE = n => ['easy', 'easy', 'medium', 'medium', 'hard', 'hard', 'pro', 'pro', 'expert', 'expert'][n - 1] || 'medium';
   const PREVIEW_SLOTS = { 3: [0, 1, 2], 2: [0, 2], 1: [1] };
+  // Special board values for hazards
+  const JUNK = 'junk', STONE = 'stone', CRACKED = 'cracked';
+  const SPECIAL_COLOR = { junk: '#a3abbb', stone: '#6b7487', cracked: '#8a93a6' };
+  const colorOf = v => SPECIAL_COLOR[v] || v;
+  const rackSize = () => cfg().rack || 3;
+  const activeSlots = () => S.slots.slice(0, rackSize());
 
   const K_STATE = 'blocktet.state';
-  const kScores = m => `blocktet.scores.${m === 'crazy' ? 'crazy' : 'L' + m}`;
-  const kHelpers = m => `blocktet.helpers.${m === 'crazy' ? 'crazy' : 'L' + m}`;
+  const kScores = m => `blocktet.scores.${m}`;
+  const kHelpers = m => `blocktet.helpers.${m}`;
   const STAR_SVG = '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" fill="#f5a524" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 
   const idx = (r, c) => (r + M) * G + (c + M);
@@ -356,13 +431,28 @@
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
     del(k) { try { localStorage.removeItem(k); } catch {} }
   };
-  // Earlier builds had a single score list and helper pool; they match Level 3 (Relaxed).
+  // Fold scores and helpers from earlier builds (one shared list, then levels 1–10)
+  // into the five named difficulties.
   (() => {
-    const old = store.get('blocktet.scores', null) || store.get('griddrop.scores', null);
-    if (old && !store.get(kScores(3), null)) store.set(kScores(3), old);
-    const oldH = store.get('blocktet.helpers', null);
-    if (oldH && !store.get(kHelpers(3), null)) store.set(kHelpers(3), oldH);
-    store.del('blocktet.scores'); store.del('blocktet.helpers');
+    const mergeScores = (m, list) => {
+      if (!list || !list.length) return;
+      const all = store.get(kScores(m), []).concat(list).sort((a, b) => b.score - a.score || a.date - b.date);
+      store.set(kScores(m), all.slice(0, 5));
+    };
+    const mergeHelpers = (m, h) => {
+      if (!h) return;
+      const cur = Object.assign({ single: 0, rotate: 0, del: 0 }, store.get(kHelpers(m), {}));
+      ['single', 'rotate', 'del'].forEach(k => { cur[k] += h[k] || 0; });
+      store.set(kHelpers(m), cur);
+    };
+    mergeScores('medium', store.get('blocktet.scores', null) || store.get('griddrop.scores', null));
+    mergeHelpers('medium', store.get('blocktet.helpers', null));
+    store.del('blocktet.scores'); store.del('blocktet.helpers'); store.del('griddrop.scores');
+    for (let n = 1; n <= 10; n++) {
+      mergeScores(LEGACY_MODE(n), store.get(`blocktet.scores.L${n}`, null));
+      mergeHelpers(LEGACY_MODE(n), store.get(`blocktet.helpers.L${n}`, null));
+      store.del(`blocktet.scores.L${n}`); store.del(`blocktet.helpers.L${n}`);
+    }
   })();
   const getScores = m => store.get(kScores(m), []);
   const bestScore = m => (getScores(m)[0] || { score: 0 }).score;
@@ -416,22 +506,18 @@
     if (!S.over) store.set(K_STATE, S);
   }
 
-  // A placement is legal when every square is empty, within the overhang,
-  // and at least one square is inside the main 10x10 area. When the level
-  // closes the ring, every square must be inside the main area.
-  function canPlace(p, r0, c0) {
-    const ring = cfg().ring;
+  // A placement is legal when every square is on the 10x10 board and empty.
+  function canPlace(p, r0, c0, board = S.board) {
     let touchesMain = false;
     for (const [r, c] of p.cells) {
       const rr = r0 + r, cc = c0 + c;
-      if (!inGrid(rr, cc) || S.board[idx(rr, cc)]) return false;
+      if (!inGrid(rr, cc) || board[idx(rr, cc)]) return false;
       if (inMain(rr, cc)) touchesMain = true;
-      else if (!ring) return false;
     }
     return touchesMain;
   }
-  function anyFit(p) {
-    for (let r = -M; r <= N + M - p.h; r++) for (let c = -M; c <= N + M - p.w; c++) if (canPlace(p, r, c)) return true;
+  function anyFit(p, board = S.board) {
+    for (let r = -M; r <= N + M - p.h; r++) for (let c = -M; c <= N + M - p.w; c++) if (canPlace(p, r, c, board)) return true;
     return false;
   }
   // A row (or column) is complete when its 10 squares across the main span are filled.
@@ -509,7 +595,7 @@
 
   function traySizes() {
     const w = slotEls[0].clientWidth - 8;
-    const cur = Math.max(10, Math.min(26, w / 5.5));
+    const cur = Math.max(10, Math.min(20, w / 5.5)); // 5 squares must fit the 118px rack height
     return { cur, curGap: Math.max(2, cur * 0.12), next: cur * 0.36, nextGap: 1 };
   }
   function renderSlot(i) {
@@ -522,14 +608,18 @@
     else nextBox.innerHTML = '<span class="hidden-next">?</span>';
     el.classList.toggle('nofit', !S.over && !anyFit(s.cur));
   }
-  const renderTray = () => [0, 1, 2].forEach(renderSlot);
+  const renderTray = () => {
+    const n = rackSize();
+    trayEl.classList.toggle('two', n === 2);
+    slotEls.forEach((el, i) => el.classList.toggle('inactive', i >= n));
+    [0, 1, 2].forEach(renderSlot);
+  };
   const refreshFit = () => S.slots.forEach((s, i) => slotEls[i].classList.toggle('nofit', !S.over && !anyFit(s.cur)));
 
   function renderBoard({ dropped, view, newStars } = {}) {
     L = layout(view);
     const { v, size, pos } = L;
     const starMap = new Map(S.stars.map(s => [s.i, s.left]));
-    const ringOpen = cfg().ring;
     for (let i = 0; i < G * G; i++) {
       const el = cellEls[i], val = S.board[i];
       const [r, c] = rcOf(i);
@@ -537,8 +627,9 @@
       el.style.transform = `translate(${p.x}px, ${p.y}px)`;
       el.style.width = el.style.height = size + 'px';
       const inView = r >= v.r0 && r <= v.r1 && c >= v.c0 && c <= v.c1;
-      el.className = 'cell ' + (inMain(r, c) ? 'main' : 'ext' + (ringOpen ? '' : ' closed')) + (inView ? '' : ' off') + (val ? ' filled' : '');
-      if (val) el.style.setProperty('--c', val); else el.style.removeProperty('--c');
+      el.className = 'cell ' + (inMain(r, c) ? 'main' : 'ext') + (inView ? '' : ' off') + (val ? ' filled' : '');
+      if (val) el.style.setProperty('--c', colorOf(val)); else el.style.removeProperty('--c');
+      if (SPECIAL_COLOR[val]) el.classList.add(val);
       if (dropped && dropped.has(i) && val) el.classList.add('drop');
       const star = el.querySelector('.star');
       if (starMap.has(i)) {
@@ -555,9 +646,13 @@
 
   function renderHUD() {
     $('score').textContent = S.score.toLocaleString();
-    $('best').textContent = bestScore(S.mode).toLocaleString();
+    const top = bestScore(S.mode), beating = top > 0 && S.score > top;
+    $('best').textContent = top.toLocaleString();
+    $('topLbl').textContent = beating ? 'New top!' : 'Top';
+    $('scoreBtn').classList.toggle('beating', beating);
+    $('scoreBtn').setAttribute('aria-label', `Score ${S.score}, top score ${top}${beating ? ' — beating it' : top > S.score ? `, ${top - S.score} to go` : ''}. View top scores`);
     const lv = curLevel();
-    $('modeBadge').textContent = S.mode === 'crazy' ? `Crazy ${lv}/10` : `Level ${lv}`;
+    $('modeBadge').textContent = S.mode === 'crazy' ? `Crazy ${lv}/10` : modeName(S.mode);
     $('modeBadge').classList.toggle('crazy', S.mode === 'crazy');
     const h = S.helpers;
     $('cSingle').textContent = h.single; $('cRotate').textContent = h.rotate; $('cDelete').textContent = h.del;
@@ -630,12 +725,20 @@
     // show the board as it looks with the piece in, then clear and resize
     renderBoard({ dropped });
     const clearing = [];
-    clear.forEach(i => { clearing.push([i, S.board[i]]); S.board[i] = null; });
+    // Stone cracks on its first clear and breaks on the second.
+    clear.forEach(i => {
+      const v = S.board[i];
+      clearing.push([i, colorOf(v)]);
+      S.board[i] = v === STONE ? CRACKED : null;
+    });
     const pts = clear.size * lines;
     S.score += pts;
     const prevLevel = curLevel();
     S.lines += lines;
     S.hProg += lines; S.sProg += lines;
+    const hz = LEVELS[prevLevel - 1];
+    if (hz.garbage) S.gLines = (S.gLines || 0) + lines;
+    if (hz.stone) S.stLines = (S.stLines || 0) + lines;
     const center = burst(clearing);
     popText(center.x, center.y, pts, lines);
     bumpScore();
@@ -702,52 +805,116 @@
   let bannerT;
   function levelBanner(from, to) {
     const b = LEVELS[to - 1], a = from ? LEVELS[from - 1] : null;
-    const items = [];
-    const ch = (label, x, y, fmt = v => v) => { if (!a) items.push(`${label}: <b>${fmt(y)}</b>`); else if (x !== y) items.push(`${label}: ${fmt(x)} → <b>${fmt(y)}</b>`); };
-    ch('Big pieces', a && a.big, b.big, v => v + '×');
-    ch('Next-piece previews', a && a.previews, b.previews);
-    ch('Helper every', a && a.helper, b.helper, v => v + ' lines');
-    ch('Stars every', a && a.star, b.star, v => v + ' lines');
-    ch('Star lasts', a && a.plays, b.plays, v => v + ' plays');
-    ch('Gray ring', a && a.ring, b.ring, v => v ? 'open' : 'closed');
-    ch('Single squares', a && a.single, b.single, v => v ? 'on' : 'off');
     let head, tag;
     if (!a) { head = 'Crazy mode'; tag = 'Gets harder every 10 lines'; }
     else if (to > from) { head = 'Harder!'; tag = to === 10 ? 'Maximum difficulty' : `Next change in ${CRAZY_STEP} lines`; }
     else { head = 'Reset — climb again'; tag = `Drops back to ${to}, then climbs to 10 again`; }
     const forever = a && to === 10 && Math.floor(S.lines / CRAZY_STEP) >= CRAZY_SEQ.length - 1;
-    if (forever) tag = 'Locked at 10/10 from here on';
+    if (to === 10 && a) tag = (forever ? 'Locked at 10/10 · ' : '') + 'Garbage, stone & only 2 pieces';
+    else if (forever) tag = 'Locked at 10/10 from here on';
     const el = $('lvlPop');
-    el.innerHTML = `<div class="lp-top"><span class="lp-lvl">${to}/10</span><div><strong>${head}</strong><small>${b.name} · ${tag}</small></div></div>
-      <ul>${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+    el.innerHTML = `<div class="lp-top"><span class="lp-lvl">${to}/10</span><div><strong>${head}</strong><small>${tag}</small></div></div>`;
     el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
-    clearTimeout(bannerT); bannerT = setTimeout(() => el.classList.remove('show'), 4200);
+    clearTimeout(bannerT); bannerT = setTimeout(() => el.classList.remove('show'), 2600);
   }
   $('lvlPop').addEventListener('click', () => $('lvlPop').classList.remove('show'));
 
   let levelChanged = false;
-  function afterMove() {
+  function afterMove(played = false) {
     if (levelChanged) {
       levelChanged = false;
       renderTray();
       setTimeout(() => { if (!busy) renderBoard(); }, 420);
     }
-    renderHUD(); refreshFit(); checkState(); save();
+    renderHUD(); refreshFit();
+    const G10 = LEVELS[9].garbage.lines, S10 = LEVELS[9].stone.lines;
+    if (played && ((S.gLines || 0) >= G10 || (S.stLines || 0) >= S10)) {
+      const dueG = Math.floor(S.gLines / G10), dueS = Math.floor((S.stLines || 0) / S10);
+      S.gLines -= dueG * G10; S.stLines = (S.stLines || 0) - dueS * S10;
+      {
+        const wasBusy = busy;
+        busy = true;
+        save();
+        setTimeout(() => {
+          const dropped = new Set();
+          if (dueG) dropGarbage(dueG).forEach(i => dropped.add(i));
+          for (let k = 0; k < dueS; k++) { const i = makeStone(); if (i != null) dropped.add(i); }
+          busy = false;
+          renderBoard({ dropped });
+          renderHUD(); refreshFit(); checkState(); save();
+        }, wasBusy ? 450 : 220);
+        return;
+      }
+    }
+    checkState(); save();
+  }
+
+  // Garbage: gray blocks land on random empty squares, never completing a line by themselves.
+  function dropGarbage(count) {
+    const out = [];
+    for (let k = 0; k < count; k++) {
+      const options = [];
+      for (let i = 0; i < S.board.length; i++) {
+        if (S.board[i]) continue;
+        const b = S.board.slice(); b[i] = JUNK;
+        const { rows, cols } = linesFor(b);
+        if (!rows.length && !cols.length) options.push(i);
+      }
+      if (!options.length) break;
+      const i = options[Math.floor(Math.random() * options.length)];
+      S.board[i] = JUNK; out.push(i);
+    }
+    return out;
+  }
+  // Stone: a random placed block hardens and needs two clears to remove.
+  let stoneHintShown = false;
+  function makeStone() {
+    const options = [];
+    S.board.forEach((v, i) => { if (v && !SPECIAL_COLOR[v]) options.push(i); });
+    if (!options.length) return null;
+    const i = options[Math.floor(Math.random() * options.length)];
+    S.board[i] = STONE;
+    if (!stoneHintShown) { stoneHintShown = true; toast('A block turned to stone — clear it twice to break it'); }
+    return i;
   }
 
   function checkState() {
     if (S.over) return;
     const st = $('status');
     if (deleteMode) return;
-    if (S.slots.some(s => anyFit(s.cur))) { st.classList.remove('show'); return; }
-    const h = S.helpers;
-    const mainEmpty = (() => { for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!S.board[idx(r, c)]) return true; return false; })();
-    const canHelp =
-      (h.single > 0 && mainEmpty) ||
-      (h.rotate > 0 && S.slots.some(s => [1, 2, 3].some(t => anyFit(rotatePiece(s.cur, t))))) ||
-      (h.del > 0 && S.slots.some(s => anyFit(s.next)));
-    if (canHelp) { st.textContent = 'No pieces fit — use a helper!'; st.classList.add('show'); }
+    if (activeSlots().some(s => anyFit(s.cur))) { st.classList.remove('show'); return; }
+    const useful = usefulHelpers();
+    if (useful.length) { st.textContent = `No pieces fit — try ${useful.join(' or ')}`; st.classList.add('show'); }
     else { st.classList.remove('show'); gameOver(); }
+  }
+
+  // Which helpers could actually lead to a playable piece? A helper only counts if
+  // using it (alone, or with the other helpers you hold) makes a rack piece fit.
+  function playableWith(board, h) {
+    const rots = p => [1, 2, 3].map(t => rotatePiece(p, t));
+    return activeSlots().some(s =>
+      anyFit(s.cur, board) ||
+      (h.rotate > 0 && rots(s.cur).some(p => anyFit(p, board))) ||
+      (h.del > 0 && (anyFit(s.next, board) || (h.rotate > 0 && rots(s.next).some(p => anyFit(p, board))))));
+  }
+  function singleHelps(h) {
+    const rest = { ...h, single: h.single - 1 };
+    for (let i = 0; i < S.board.length; i++) {
+      if (S.board[i]) continue;
+      const b = S.board.slice(); b[i] = '#000';
+      const { rows, cols } = linesFor(b);
+      lineCells(rows, cols, b).forEach(k => { b[k] = null; });
+      if (playableWith(b, rest) || (rest.single > 0 && rows.length + cols.length > 0)) return true;
+    }
+    return false;
+  }
+  function usefulHelpers() {
+    const h = S.helpers, out = [];
+    if (h.rotate > 0 && playableWith(S.board, { rotate: h.rotate, del: 0 })) out.push('Rotate');
+    if (h.del > 0 && playableWith(S.board, { rotate: 0, del: h.del })) out.push('Delete');
+    if (!out.length && h.rotate > 0 && h.del > 0 && playableWith(S.board, h)) out.push('Delete then Rotate');
+    if (h.single > 0 && singleHelps(h)) out.push('Square');
+    return out;
   }
 
   // ---------- game over / scores ----------
@@ -768,16 +935,22 @@
     saveHelpers();
     const { isRecord, entry } = recordScore(S.score);
     renderHUD(); refreshFit();
+    const st = $('status');
+    st.textContent = `Game over · ${S.score.toLocaleString()} points saved — tap ↻ to play again`;
+    st.classList.add('show', 'over');
     const kept = S.helpers.single + S.helpers.rotate + S.helpers.del;
     setTimeout(() => {
       openModal(`
         <h2>Game over</h2>
+        <p>None of your pieces can be played${kept ? ', and no helper would change that' : ''}.</p>
         <p>${modeLabel(S.mode)}${S.mode === 'crazy' ? ` · reached ${curLevel()}/10` : ''}</p>
         ${isRecord ? '<div class="record">New record!</div>' : ''}
         <div class="big">${S.score.toLocaleString()}</div>
-        <p>${S.lines} line${S.lines === 1 ? '' : 's'} cleared${kept && S.mode !== 'crazy' ? ` · ${kept} helper${kept === 1 ? '' : 's'} saved for your next ${S.mode === 'crazy' ? 'Crazy' : 'Level ' + S.mode} game` : ''}</p>
+        <p>${S.lines} line${S.lines === 1 ? '' : 's'} cleared${kept && S.mode !== 'crazy' ? ` · ${kept} helper${kept === 1 ? '' : 's'} saved for your next ${modeName(S.mode)} game` : ''}</p>
+        <p class="saved">✓ Score saved to your ${modeName(S.mode)} top 5</p>
         ${scoresHTML(S.mode, entry.date)}
-        <div class="btns"><button class="btn ghostbtn" data-act="picker">Change difficulty</button><button class="btn" data-act="again">Play again</button></div>`, 'over');
+        <div class="btns"><button class="btn ghostbtn" data-act="picker">Change difficulty</button><button class="btn" data-act="again">Play again</button></div>
+        <button class="linkbtn" data-act="close">View final board</button>`, 'over');
     }, 700);
   }
   function scoresHTML(mode, highlightDate) {
@@ -791,8 +964,8 @@
       </li>`).join('') + '</ol>';
   }
   function showScores(mode) {
-    const tabs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'crazy'].map(m =>
-      `<button class="tab${m === mode ? ' on' : ''}${m === 'crazy' ? ' crazy' : ''}" data-act="sv:${m}">${m === 'crazy' ? 'Crazy' : m}</button>`).join('');
+    const tabs = MODE_IDS.map(m =>
+      `<button class="tab${m === mode ? ' on' : ''}${m === 'crazy' ? ' crazy' : ''}" data-act="sv:${m}">${m === 'crazy' ? 'Crazy' : MODE[m].name}</button>`).join('');
     openModal(`<h2>Top scores</h2><div class="tabs">${tabs}</div><p class="sub">${modeLabel(mode)}</p>${scoresHTML(mode)}
       <div class="btns"><button class="btn" data-act="close">Close</button></div>`);
   }
@@ -802,69 +975,42 @@
   function openPicker(opts = {}) {
     lastPickerOpts = opts;
     const { canResume = false, canCancel = false } = opts;
-    const lv = LEVELS.map((L, k) => {
-      const m = k + 1, best = bestScore(m);
-      return `<button class="lvl" data-act="mode:${m}" style="--t:${k / 9}">
-        <b>${m}</b><span>${L.name}</span><small>${best ? 'Best ' + best.toLocaleString() : '—'}</small></button>`;
+    const lv = MODES.map((M, k) => {
+      const best = bestScore(M.id);
+      return `<button class="lvl" data-act="mode:${M.id}" style="--t:${k / 4}">
+        <b>${M.name}</b><small>${best ? 'Best ' + best.toLocaleString() : '—'}</small></button>`;
     }).join('');
     const cbest = bestScore('crazy');
-    const resume = canResume ? `<button class="btn resume" data-act="resume">Resume ${S.mode === 'crazy' ? 'Crazy mode' : 'Level ' + S.mode} · ${S.score.toLocaleString()} pts</button>` : '';
+    const resume = canResume ? `<button class="btn resume" data-act="resume">Resume ${modeName(S.mode)} · ${S.score.toLocaleString()} pts</button>` : '';
     const warn = (canResume || canCancel) && S.score > 0 ? '<p class="sub">Starting a new game saves your current score.</p>' : '';
     openModal(`<h2>Block<span style="color:var(--accent)">tet</span></h2>${resume}
       <p class="sub">Choose a difficulty</p>
       <div class="lvl-grid">${lv}</div>
       <button class="crazy-btn" data-act="mode:crazy"><b>Crazy mode</b>
-        <span>Starts at 1 and gets harder every 10 lines. After 10, it drops back and climbs again, until it stays at 10.</span>
+        <span>Gets harder every 10 lines, then drops back and climbs again — until it stays at its hardest.</span>
         <small>${cbest ? 'Best ' + cbest.toLocaleString() : 'No score yet'}</small></button>
       ${warn}
       ${canCancel ? '<div class="btns"><button class="btn ghostbtn" data-act="close">Back to game</button></div>' : ''}`, canCancel ? 'picker' : 'locked');
   }
 
   // ---------- level details ----------
-  const BIG_NAMES = '5-long lines, 2×3 and 3×3 blocks, and diagonals';
-  const SMALL_NAMES = 'single squares, dominoes, 3-long lines and small corners';
-  function mixText(big) {
-    if (big === 1) return 'All 16 shapes are equally likely.';
-    const f = v => (Math.round(v * 100) / 100).toString().replace(/\.0+$/, '');
-    if (big < 1) return `Big pieces (${BIG_NAMES}) show up ${f(big)}× as often, and small pieces (${SMALL_NAMES}) ${f(1 / big)}× as often.`;
-    return `Big pieces (${BIG_NAMES}) show up ${f(big)}× as often, and small pieces (${SMALL_NAMES}) only ${f(1 / big)}× as often.`;
-  }
-  function settingRows(L, helperNote) {
-    const prev = { 3: 'You can see the next piece under all three rack pieces.',
-                   2: 'Only the left and right pieces show what comes next; the middle one is a surprise.',
-                   1: 'Only the middle piece shows what comes next; the other two are surprises.' }[L.previews];
-    const rows = [
-      ['Piece mix', mixText(L.big) + (L.single ? '' : ' Single squares never appear as random pieces.')],
-      ['Previews', prev],
-      ['Gray ring', L.ring ? 'Open. Pieces can hang one square past the edge into the gray ring, as long as part of the piece is on the board.'
-                           : 'Closed. Every piece must fit completely inside the 10×10 board.'],
-      ['Helpers', `Earn a random helper (Square, Rotate or Delete) every ${L.helper} lines. ${helperNote}`],
-      ['Stars', `A star appears every ${L.star} lines. Clear a row or column through it within ${L.plays} plays to win a bonus helper.`]
-    ];
-    return '<dl class="settings">' + rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('') + '</dl>';
-  }
-  function meter(n) {
-    return `<div class="meter" aria-label="Difficulty ${n} of 10">${Array.from({ length: 10 }, (_, k) =>
-      `<i class="${k < n ? 'on' : ''}" style="--t:${k / 9}"></i>`).join('')}</div>`;
+  function meter(n, of) {
+    return `<div class="meter" aria-label="Difficulty ${n} of ${of}">${Array.from({ length: of }, (_, k) =>
+      `<i class="${k < n ? 'on' : ''}" style="--t:${k / (of - 1)}"></i>`).join('')}</div>`;
   }
   function showLevelInfo(m) {
     const best = bestScore(m);
     const bestTxt = best ? `Your best: <b>${best.toLocaleString()}</b>` : 'No score yet';
     let body;
     if (m === 'crazy') {
-      body = `<h2>Crazy mode</h2>${meter(1)}
-        <p class="sub">Starts at level 1 and gets one level harder every ${CRAZY_STEP} lines.</p>
-        <dl class="settings">
-          <dt>How it climbs</dt><dd>1 → 10, then drops to 2 and climbs to 10 again, then 3 → 10, and so on. Once a drop would land on 10, it stays at 10 for good (after ${CRAZY_SEQ.length * CRAZY_STEP - CRAZY_STEP} lines).</dd>
-          <dt>Changes as you go</dt><dd>Each level brings its own piece mix, previews, gray ring, helper rate and star timing. A pop-up at the top tells you what changed.</dd>
-          <dt>Helpers</dt><dd>You start with none. Helpers you earn can be used during this game but aren't saved afterward.</dd>
-          <dt>Strategy</dt><dd>It's built to end. Score big by clearing several rows and columns at once; points are multiplied by the number of lines cleared together.</dd>
-        </dl>
-        <details><summary>Level 1 starting settings</summary>${settingRows(LEVELS[0], 'Helpers earned in Crazy mode are not saved.')}</details>`;
+      body = `<h2>Crazy mode</h2>${meter(1, 6)}
+        <p class="blurb">Starts easy and gets harder every ${CRAZY_STEP} lines. At its hardest it drops back a little and climbs again, until it stays at its hardest for good.</p>
+        <p class="blurb">You start with no helpers. Clear several lines at once — points multiply.</p>`;
     } else {
-      const L = LEVELS[m - 1], h = savedHelpers(m), n = h.single + h.rotate + h.del;
-      const note = n ? `You have ${n} saved for this level (${h.single} Square, ${h.rotate} Rotate, ${h.del} Delete).` : 'Unused helpers are saved for your next game at this level.';
-      body = `<h2>Level ${m} · ${L.name}</h2>${meter(m)}${settingRows(L, note)}`;
+      const M = MODE[m], h = savedHelpers(m), n = h.single + h.rotate + h.del;
+      body = `<h2>${M.name}</h2>${meter(MODES.indexOf(M) + 1, 6)}
+        <p class="blurb">${M.blurb}</p>
+        <p class="blurb">${n ? `You have ${n} saved helper${n === 1 ? '' : 's'}.` : 'Unused helpers are saved for your next game.'}</p>`;
     }
     openModal(`${body}<p class="sub">${bestTxt}</p>
       <div class="btns"><button class="btn ghostbtn" data-act="back">Back</button><button class="btn start" data-act="start:${m}">Start</button></div>`,
@@ -877,7 +1023,7 @@
   function openModal(html, kind = '') { modalKind = kind; modalCard.innerHTML = html; modal.classList.remove('hidden'); }
   function closeModal() { modal.classList.add('hidden'); modalKind = ''; }
   modal.addEventListener('click', e => {
-    if (e.target === modal) { if (modalKind !== 'locked' && modalKind !== 'over') closeModal(); return; }
+    if (e.target === modal) { if (modalKind !== 'locked') closeModal(); return; }
     const act = e.target.closest('[data-act]');
     if (!act) return;
     const a = act.dataset.act;
@@ -886,21 +1032,21 @@
     if (a === 'picker') openPicker();
     if (a === 'resume') closeModal();
     if (a === 'abandon') { recordScore(S.score); S.score = 0; store.del(K_STATE); openPicker(); }
-    if (a.startsWith('mode:')) showLevelInfo(a.slice(5) === 'crazy' ? 'crazy' : +a.slice(5));
+    if (a.startsWith('mode:')) showLevelInfo(a.slice(5));
     if (a === 'back') openPicker(lastPickerOpts);
     if (a.startsWith('start:')) {
-      const m = a.slice(6) === 'crazy' ? 'crazy' : +a.slice(6);
+      const m = a.slice(6);
       if (!S.over && S.score > 0) recordScore(S.score);
       closeModal(); newGame(m);
     }
-    if (a.startsWith('sv:')) showScores(a.slice(3) === 'crazy' ? 'crazy' : +a.slice(3));
+    if (a.startsWith('sv:')) showScores(a.slice(3));
     if (a.startsWith('rot')) { closeModal(); doRotate(+a.slice(3)); }
   });
   $('scoreBtn').addEventListener('click', () => showScores(S.mode));
   $('newBtn').addEventListener('click', () => {
     if (S.over) { openPicker(); return; }
     if (S.score === 0) { openPicker({ canCancel: true }); return; }
-    openModal(`<h2>New game?</h2><p>Your current score of <b>${S.score.toLocaleString()}</b> will be saved to your ${S.mode === 'crazy' ? 'Crazy mode' : 'Level ' + S.mode} scores. Unused helpers stay with this mode.</p>
+    openModal(`<h2>New game?</h2><p>Your current score of <b>${S.score.toLocaleString()}</b> will be saved to your ${modeName(S.mode)} scores. Unused helpers stay with this mode.</p>
       <div class="btns"><button class="btn ghostbtn" data-act="close">Keep playing</button><button class="btn" data-act="abandon">New game</button></div>`);
   });
 
@@ -908,7 +1054,7 @@
     saveHelpers();
     S = freshState(mode);
     setDeleteMode(false);
-    $('status').classList.remove('show');
+    $('status').classList.remove('show', 'over');
     renderAll();
     save();
     if (mode === 'crazy') levelBanner(null, 1);
@@ -939,21 +1085,21 @@
     if (!S.helpers.rotate || S.over) return;
     setDeleteMode(false);
     const opt = (t, label) => {
-      const prev = S.slots.map(s => {
+      const prev = activeSlots().map(s => {
         const rp = rotatePiece(s.cur, t);
         const size = Math.min(9, 40 / Math.max(rp.w, rp.h));
         return renderPiece(rp, size, 1.5).outerHTML;
       }).join('');
       return `<button class="rot-opt" data-act="rot${t}"><b>${label}</b><span class="prev">${prev}</span></button>`;
     };
-    openModal(`<h2>Rotate pieces</h2><p>All three pieces turn clockwise.</p>
+    openModal(`<h2>Rotate pieces</h2><p>All your pieces turn clockwise.</p>
       <div class="rot-opts">${opt(1, '90°')}${opt(2, '180°')}${opt(3, '270°')}</div>
       <div class="btns"><button class="btn ghostbtn" data-act="close">Cancel</button></div>`);
   });
   function doRotate(t) {
     if (!S.helpers.rotate) return;
     S.helpers.rotate--;
-    S.slots.forEach(s => { s.cur = rotatePiece(s.cur, t); });
+    activeSlots().forEach(s => { s.cur = rotatePiece(s.cur, t); });
     renderTray();
     slotEls.forEach(el => {
       const p = el.querySelector('.cur .piece');
@@ -1063,7 +1209,7 @@
       place(d.piece, d.target[0], d.target[1]);
       if (d.source.type === 'slot') advanceSlot(d.source.i);
       else if (d.source.type === 'single') S.helpers.single--;
-      afterMove();
+      afterMove(true);
     } else snapBack(d);
   }
   function cancelDrag(e) {
@@ -1090,17 +1236,52 @@
     S = saved;
     S.helpers = Object.assign({ single: 0, rotate: 0, del: 0 }, S.helpers);
     S.stars = S.stars || [];
-    if (S.mode == null) S.mode = 3;               // games saved before levels existed
+    if (S.mode == null) S.mode = 'medium';        // games saved before levels existed
+    else if (typeof S.mode === 'number') S.mode = LEGACY_MODE(S.mode);
     if (S.hProg == null) S.hProg = S.lines % 25;
     if (S.sProg == null) S.sProg = S.lines % 10;
     uid = 1 + Math.max(0, ...S.slots.flatMap(s => [s.cur.id, s.next.id]));
     renderAll();
     openPicker({ canResume: true });
   } else {
-    S = freshState(3); S.over = true;             // placeholder board behind the picker
+    S = freshState('medium'); S.over = true;             // placeholder board behind the picker
     renderAll();
     openPicker();
   }
+
+  // ---------- install prompt ----------
+  // On start-up, if Blocktet isn't running as an installed app, explain how to install it.
+  (() => {
+    const standalone = matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || navigator.standalone === true;
+    let framed = false; try { framed = window.self !== window.top; } catch { framed = true; }
+    if (standalone || framed || store.get('blocktet.installDismissed', false)) return;
+    const sheet = $('installSheet'), text = $('installText'), go = $('installGo');
+    const ua = navigator.userAgent;
+    const ios = /iphone|ipad|ipod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    const android = /android/i.test(ua);
+    const SHARE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M5 11v9h14v-9"/></svg>';
+    let deferred = null;
+    const setText = () => {
+      if (deferred) { text.innerHTML = 'Add it to your device to play full-screen, offline, and launch it like any other app.'; go.hidden = false; }
+      else if (ios) text.innerHTML = `Tap the Share button ${SHARE} in your browser, then choose <b>Add to Home Screen</b>. It'll open full-screen and work offline.`;
+      else if (android) text.innerHTML = 'Open your browser menu <b>⋮</b> and choose <b>Install app</b> or <b>Add to Home screen</b>. It\'ll open full-screen and work offline.';
+      else text.innerHTML = 'Look for the install icon in your browser\'s address bar, or open the browser menu and choose <b>Install Blocktet</b> (in Safari: <b>File → Add to Dock</b>).';
+    };
+    const show = () => { setText(); sheet.hidden = false; };
+    const hide = () => { sheet.hidden = true; };
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; if (!sheet.hidden) setText(); });
+    window.addEventListener('appinstalled', () => { hide(); toast('Blocktet installed!'); });
+    go.addEventListener('click', async () => {
+      if (!deferred) return;
+      deferred.prompt();
+      const { outcome } = await deferred.userChoice.catch(() => ({}));
+      deferred = null; go.hidden = true;
+      if (outcome === 'accepted') hide(); else setText();
+    });
+    $('installLater').addEventListener('click', hide);
+    $('installNever').addEventListener('click', () => { store.set('blocktet.installDismissed', true); hide(); });
+    setTimeout(show, 900);
+  })();
 
   // ---------- updates ----------
   // On load and whenever the app becomes visible again, compare this build's version with
@@ -1159,7 +1340,7 @@
     });
   } else window.addEventListener('load', () => checkForUpdate());
 
-  window.__bt = { get S() { return S; }, level: () => curLevel(), idx, canPlace, anyFit, render: renderAll, renderBoard, place, afterMove, addStar };
+  window.__bt = { usefulHelpers: () => usefulHelpers(), get S() { return S; }, level: () => curLevel(), idx, canPlace, anyFit, render: renderAll, renderBoard, place, afterMove, addStar };
 })();
 </script>
 </body>
