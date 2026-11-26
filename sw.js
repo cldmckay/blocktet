@@ -1,5 +1,5 @@
 // Bump CACHE (and APP_VERSION in index.html + version.json) for each release.
-const CACHE = 'blocktet-v14';
+const CACHE = 'blocktet-v15';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {

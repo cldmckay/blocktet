@@ -347,7 +347,7 @@
 <script>
 (() => {
   // ---------- constants ----------
-  const APP_VERSION = '14';    // keep in sync with version.json and the cache name in sw.js
+  const APP_VERSION = '15';    // keep in sync with version.json and the cache name in sw.js
   const N = 10;               // main play area
   const M = 0;                // no overhang: pieces must fit on the 10x10 board
   const G = N + 2 * M;        // full virtual grid (18)
@@ -1062,21 +1062,23 @@
 
   // ---------- helpers ----------
   let deleteMode = false;
-  function setDeleteMode(on) {
+  function setDeleteMode(on, check = true) {
     deleteMode = on;
     document.body.classList.toggle('deleting', on);
     $('hDelete').classList.toggle('active', on);
     const st = $('status');
     if (on) { st.textContent = 'Tap a piece to delete it — tap Delete again to cancel'; st.classList.add('show'); }
-    else { st.classList.remove('show'); if (S) checkState(); }
+    else { st.classList.remove('show'); if (S && check) checkState(); }
   }
   $('hDelete').addEventListener('click', () => { if (S.helpers.del > 0 && !S.over) setDeleteMode(!deleteMode); });
   function deleteSlot(i) {
     if (!deleteMode || S.helpers.del <= 0) return;
     S.helpers.del--;
-    setDeleteMode(false);
+    // Don't check for game over until the replacement piece is in the rack.
+    setDeleteMode(false, false);
+    busy = true;
     const p = slotEls[i].querySelector('.cur .piece');
-    const finish = () => { advanceSlot(i); afterMove(); };
+    const finish = () => { busy = false; advanceSlot(i); afterMove(); };
     if (p) p.animate([{ transform: 'none', opacity: 1 }, { transform: 'scale(.2) rotate(-25deg)', opacity: 0 }], { duration: 220, easing: 'ease-in' }).onfinish = finish;
     else finish();
   }
