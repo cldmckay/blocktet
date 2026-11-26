@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#f3f5fa">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Blocktet">
+<title>Blocktet</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+  :root {
+    --bg: #f3f5fa; --panel: #ffffff; --cell: #dde3ee; --ext: #eceef2; --line: #dfe4ee;
+    --text: #1f2633; --muted: #6b7487; --accent: #2f80ed; --danger: #e5484d; --gold: #f5a524;
+    --size: min(calc(100vw - 24px), 520px, calc(100vh - 350px));
+  }
+  @supports (height: 100dvh) { :root { --size: min(calc(100vw - 24px), 520px, calc(100dvh - 350px)); } }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    overscroll-behavior: none; -webkit-user-select: none; user-select: none;
+    -webkit-tap-highlight-color: transparent; overflow: hidden;
+  }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  #app {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    height: 100vh; height: 100dvh; max-width: 560px; margin: 0 auto;
+    padding: calc(env(safe-area-inset-top) + 8px) 12px calc(env(safe-area-inset-bottom) + 8px);
+  }
+  header { width: var(--size); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .title { font-weight: 800; font-size: 22px; letter-spacing: .3px; }
+  .title span { color: var(--accent); }
+  .hdr-right { display: flex; gap: 8px; align-items: center; }
+  #scoreBtn {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 1px 2px rgba(20,30,60,.06);
+    padding: 6px 14px; display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; min-width: 108px;
+  }
+  #scoreBtn small { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  #score { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; transition: transform .15s, color .15s; }
+  #score.bump { transform: scale(1.18); color: var(--accent); }
+  .icon-btn {
+    width: 42px; height: 42px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line);
+    display: grid; place-items: center; box-shadow: 0 1px 2px rgba(20,30,60,.06);
+  }
+  .icon-btn svg { width: 20px; height: 20px; }
+
+  /* ---------- board ---------- */
+  #stage { width: var(--size); height: var(--size); position: relative; flex-shrink: 0; touch-action: none; }
+  #stage .cell, #frame { transition: transform .35s cubic-bezier(.2,.8,.2,1), width .35s cubic-bezier(.2,.8,.2,1), height .35s cubic-bezier(.2,.8,.2,1), opacity .3s; }
+  #stage.noanim .cell, #stage.noanim #frame { transition: none; }
+  .cell { position: absolute; left: 0; top: 0; }
+  .cell .in { position: absolute; inset: 0; border-radius: 20%; background: var(--cell); }
+  .cell.ext .in { background: var(--ext); }
+  .cell.off { opacity: 0; pointer-events: none; }
+  .cell.filled .in, .blk, .ghost {
+    background: var(--c);
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,.16), inset 0 2px 0 rgba(255,255,255,.35);
+  }
+  .cell.hint .in { filter: brightness(1.18) saturate(1.2); outline: 2px solid rgba(47,128,237,.55); outline-offset: -1px; }
+  .cell.hint:not(.filled) .in { background: #c9d8f5; }
+  .cell.drop .in { animation: drop .22s ease-out; }
+  @keyframes drop { from { transform: scale(.7); } to { transform: scale(1); } }
+  #frame {
+    position: absolute; left: 0; top: 0; border: 2px solid #c3cbdb; border-radius: 10px; pointer-events: none;
+  }
+  #ghosts { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+  .ghost { position: absolute; border-radius: 20%; opacity: .55; }
+  .burst {
+    position: absolute; border-radius: 20%; background: var(--c); pointer-events: none; z-index: 3;
+    animation: burst .42s ease-in forwards;
+  }
+  @keyframes burst {
+    0% { transform: scale(1); opacity: 1; filter: brightness(1.3); }
+    100% { transform: scale(.1) rotate(45deg); opacity: 0; }
+  }
+  .star { position: absolute; inset: 8%; display: grid; place-items: center; pointer-events: none; z-index: 2; }
+  .star svg { width: 100%; height: 100%; filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); animation: twinkle 1.6s ease-in-out infinite; }
+  .star b {
+    position: absolute; right: -10%; bottom: -10%; min-width: 46%; height: 46%; border-radius: 99px; background: #fff;
+    color: var(--text); font-size: max(8px, 1.2vh); display: grid; place-items: center; box-shadow: 0 1px 2px rgba(0,0,0,.25); font-weight: 800;
+  }
+  @keyframes twinkle { 50% { transform: scale(.86) rotate(8deg); } }
+  .star.new svg { animation: starIn .6s ease-out, twinkle 1.6s ease-in-out .6s infinite; }
+  @keyframes starIn { from { transform: scale(3) rotate(-90deg); opacity: 0; } }
+  .pop {
+    position: absolute; pointer-events: none; font-weight: 900; font-size: 26px; color: var(--text);
+    text-shadow: 0 2px 0 #fff, 0 0 12px #fff; transform: translate(-50%, -50%);
+    animation: pop 1s ease-out forwards; white-space: nowrap; text-align: center; z-index: 5;
+  }
+  .pop small { display: block; font-size: 14px; color: var(--accent); }
+  @keyframes pop {
+    0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); }
+    20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+    100% { opacity: 0; transform: translate(-50%, -140%) scale(1); }
+  }
+
+  /* ---------- hud ---------- */
+  #progress { width: var(--size); display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+  #progress .bar { flex: 1; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+  #progress .bar i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+  #progress .st { color: var(--gold); font-weight: 700; }
+  #helpers { width: var(--size); display: flex; gap: 8px; }
+  .helper {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; height: 40px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px; font-size: 13px; font-weight: 600;
+    touch-action: none; box-shadow: 0 1px 2px rgba(20,30,60,.06);
+  }
+  .helper:disabled { opacity: .4; cursor: default; }
+  .helper .count {
+    min-width: 20px; height: 20px; border-radius: 10px; background: var(--line); font-size: 12px;
+    display: grid; place-items: center; padding: 0 5px;
+  }
+  .helper:not(:disabled) .count { background: var(--accent); color: #fff; }
+  .helper.active { border-color: var(--danger); background: #fdecec; }
+  .helper .sq { width: 14px; height: 14px; border-radius: 3px; background: var(--gold); box-shadow: inset 0 -2px 0 rgba(0,0,0,.15); }
+  .helper svg { width: 16px; height: 16px; }
+  #status { width: var(--size); text-align: center; font-size: 13px; font-weight: 700; color: var(--danger); display: none; }
+  #status.show { display: block; }
+
+  /* ---------- tray ---------- */
+  #tray { width: var(--size); display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .slot { display: flex; flex-direction: column; align-items: center; border-radius: 14px; border: 2px dashed transparent; transition: border-color .2s, background .2s; }
+  .slot .cur { height: 118px; width: 100%; display: grid; place-items: center; touch-action: none; cursor: grab; }
+  .slot .next { height: 34px; width: 100%; display: grid; place-items: center; opacity: .45; }
+  .slot.nofit .cur { cursor: not-allowed; }
+  .slot.nofit .cur .piece { opacity: .18; filter: grayscale(1); transition: opacity .25s, filter .25s; }
+  .slot.nofit .cur .piece.shake { animation: shake .35s; }
+  @keyframes shake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+  body.deleting .slot { border-color: var(--danger); background: #fdecec; cursor: pointer; }
+  body.deleting .slot .cur { cursor: pointer; }
+  .piece { position: relative; }
+  .piece .blk { position: absolute; border-radius: 20%; }
+  .slot .cur .piece { filter: drop-shadow(0 4px 6px rgba(20,30,60,.16)); }
+  .piece.dragging-src { opacity: .15; }
+  .piece.enter { animation: enter .35s ease-out; }
+  @keyframes enter { from { opacity: 0; transform: translateY(10px) scale(.4); } to { opacity: 1; transform: none; } }
+  .floating { position: fixed; left: 0; top: 0; z-index: 50; pointer-events: none; filter: drop-shadow(0 10px 14px rgba(20,30,60,.28)); }
+
+  #toast {
+    position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 70px); transform: translate(-50%, -20px);
+    background: var(--text); color: #fff; font-weight: 700; padding: 10px 18px; border-radius: 999px;
+    opacity: 0; transition: all .3s; z-index: 60; pointer-events: none; font-size: 14px; white-space: nowrap;
+    box-shadow: 0 6px 20px rgba(20,30,60,.25);
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  .overlay {
+    position: fixed; inset: 0; background: rgba(30,40,60,.35); backdrop-filter: blur(4px);
+    display: grid; place-items: center; z-index: 100; padding: 20px;
+  }
+  .overlay.hidden { display: none; }
+  .card {
+    background: var(--panel); border-radius: 18px; padding: 22px; box-shadow: 0 20px 50px rgba(20,30,60,.25);
+    width: min(360px, 100%); text-align: center; animation: cardIn .25s ease-out;
+  }
+  @keyframes cardIn { from { transform: scale(.92); opacity: 0; } to { transform: none; opacity: 1; } }
+  .card h2 { margin: 0 0 6px; font-size: 22px; }
+  .card p { margin: 6px 0; color: var(--muted); }
+  .big { font-size: 46px; font-weight: 900; margin: 8px 0; font-variant-numeric: tabular-nums; }
+  .record { color: var(--gold); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; }
+  .btn { display: inline-block; margin-top: 14px; padding: 12px 22px; border-radius: 12px; border: 0; background: var(--accent); color: #fff; font-weight: 800; }
+  .btn.ghostbtn { background: transparent; color: var(--text); border: 1px solid var(--line); }
+  .btns { display: flex; gap: 10px; justify-content: center; }
+  ol.scores { list-style: none; padding: 0; margin: 14px 0 0; text-align: left; }
+  ol.scores li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; margin-bottom: 6px; background: var(--bg); }
+  ol.scores .rk { width: 26px; height: 26px; border-radius: 13px; display: grid; place-items: center; background: var(--line); font-weight: 800; font-size: 13px; }
+  ol.scores li:first-child .rk { background: var(--gold); color: #fff; }
+  ol.scores .sc { font-weight: 800; font-size: 18px; flex: 1; font-variant-numeric: tabular-nums; }
+  ol.scores .dt { color: var(--muted); font-size: 12px; }
+  ol.scores li.me { outline: 2px solid var(--accent); }
+  .rot-opts { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .rot-opt { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); text-align: left; }
+  .rot-opt:hover { border-color: var(--accent); }
+  .rot-opt b { width: 48px; font-size: 16px; }
+  .rot-opt .prev { display: flex; gap: 12px; align-items: center; flex: 1; justify-content: space-around; min-height: 44px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="title">Block<span>tet</span></div>
+    <div class="hdr-right">
+      <button id="scoreBtn" aria-label="Score — view top scores">
+        <small>Score · Best <span id="best">0</span></small>
+        <span id="score">0</span>
+      </button>
+      <button class="icon-btn" id="newBtn" aria-label="New game">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="stage"><div id="frame"></div><div id="ghosts"></div></div>
+
+  <div id="progress">
+    <span id="linesTxt">Lines 0</span>
+    <span class="st" id="starTxt">★ in 10</span>
+    <span class="bar"><i id="barFill"></i></span>
+    <span id="nextTxt">Helper in 25</span>
+  </div>
+
+  <div id="helpers">
+    <button class="helper" id="hSingle" title="Drag a single square onto the board"><span class="sq"></span>Square <span class="count" id="cSingle">0</span></button>
+    <button class="helper" id="hRotate" title="Rotate all three pieces">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>Rotate <span class="count" id="cRotate">0</span></button>
+    <button class="helper" id="hDelete" title="Delete one piece">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>Delete <span class="count" id="cDelete">0</span></button>
+  </div>
+
+  <div id="status"></div>
+  <div id="tray"></div>
+</div>
+
+<div id="toast"></div>
+<div id="modal" class="overlay hidden"><div class="card" id="modalCard"></div></div>
+
+<script>
+(() => {
+  // ---------- constants ----------
+  const N = 10;               // main play area
+  const M = 1;                // max overhang beyond the main area (one ring)
+  const G = N + 2 * M;        // full virtual grid (18)
+  const BASE_VIEW = N + 2;    // main + one gray ring
+  const LINES_PER_HELPER = 25;
+  const LINES_PER_STAR = 10;
+  const STAR_PLAYS = 5;
+  const COLORS = ['#ef5350', '#fb8c00', '#fbc02d', '#43a047', '#26a69a', '#1e88e5', '#5c6bc0', '#ab47bc', '#ec407a'];
+  const SINGLE_COLOR = '#f5a524';
+  const SHAPES = [
+    ['#'],                                   // A single
+    ['##'], ['###'], ['####'], ['#####'],    // B C D E lines
+    ['##', '##'], ['###', '###'], ['###', '###', '###'], // F G H
+    ['#.', '##'],                            // I small corner
+    ['#..', '###'], ['..#', '###'],          // J L, K mirror L
+    ['###', '.#.'],                          // L T
+    ['.##', '##.'], ['##.', '.##'],          // M S, N Z
+    ['#.', '.#'], ['#..', '.#.', '..#']      // V W diagonals
+  ];
+  const K_SCORES = 'blocktet.scores', K_STATE = 'blocktet.state', K_HELPERS = 'blocktet.helpers';
+  const STAR_SVG = '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" fill="#f5a524" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+
+  const idx = (r, c) => (r + M) * G + (c + M);
+  const rcOf = i => [Math.floor(i / G) - M, (i % G) - M];
+  const inMain = (r, c) => r >= 0 && r < N && c >= 0 && c < N;
+  const inGrid = (r, c) => r >= -M && r < N + M && c >= -M && c < N + M;
+
+  // ---------- storage ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} }
+  };
+  // carry over scores from the earlier "Grid Drop" build
+  if (!store.get(K_SCORES, null) && store.get('griddrop.scores', null)) store.set(K_SCORES, store.get('griddrop.scores'));
+  const getScores = () => store.get(K_SCORES, []);
+  const bestScore = () => (getScores()[0] || { score: 0 }).score;
+  const savedHelpers = () => Object.assign({ single: 0, rotate: 0, del: 0 }, store.get(K_HELPERS, {}));
+
+  // ---------- pieces ----------
+  let uid = 1;
+  function norm(cells) {
+    const minR = Math.min(...cells.map(x => x[0])), minC = Math.min(...cells.map(x => x[1]));
+    const cs = cells.map(([r, c]) => [r - minR, c - minC]);
+    return { cells: cs, h: Math.max(...cs.map(x => x[0])) + 1, w: Math.max(...cs.map(x => x[1])) + 1 };
+  }
+  function parse(rows) {
+    const cells = [];
+    rows.forEach((row, r) => [...row].forEach((ch, c) => { if (ch === '#') cells.push([r, c]); }));
+    return norm(cells);
+  }
+  function rotatePiece(p, times) {
+    let cur = { cells: p.cells, h: p.h, w: p.w };
+    for (let i = 0; i < times % 4; i++) cur = norm(cur.cells.map(([r, c]) => [c, cur.h - 1 - r]));
+    return { ...p, ...cur };
+  }
+  function randomPiece() {
+    const base = parse(SHAPES[Math.floor(Math.random() * SHAPES.length)]);
+    const p = { ...base, color: COLORS[Math.floor(Math.random() * COLORS.length)], id: uid++ };
+    return rotatePiece(p, Math.floor(Math.random() * 4));
+  }
+
+  // ---------- state ----------
+  let S, busy = false;
+  function freshState(helpers) {
+    return {
+      board: Array(G * G).fill(null),
+      slots: [0, 1, 2].map(() => ({ cur: randomPiece(), next: randomPiece() })),
+      helpers, stars: [], score: 0, lines: 0, over: false
+    };
+  }
+  function save() {
+    store.set(K_HELPERS, S.helpers);
+    if (!S.over) store.set(K_STATE, S);
+  }
+
+  // A placement is legal when every square is empty, within the overhang,
+  // and at least one square is inside the main 10x10 area.
+  function canPlace(p, r0, c0) {
+    let touchesMain = false;
+    for (const [r, c] of p.cells) {
+      const rr = r0 + r, cc = c0 + c;
+      if (!inGrid(rr, cc) || S.board[idx(rr, cc)]) return false;
+      if (inMain(rr, cc)) touchesMain = true;
+    }
+    return touchesMain;
+  }
+  function anyFit(p) {
+    for (let r = -M; r <= N + M - p.h; r++) for (let c = -M; c <= N + M - p.w; c++) if (canPlace(p, r, c)) return true;
+    return false;
+  }
+  // A row (or column) is complete when its 10 squares across the main span are filled.
+  // Clearing it removes every square in that line, including overhang squares.
+  function linesFor(board) {
+    const rows = [], cols = [];
+    for (let r = -M; r < N + M; r++) { let f = true; for (let c = 0; c < N; c++) if (!board[idx(r, c)]) { f = false; break; } if (f) rows.push(r); }
+    for (let c = -M; c < N + M; c++) { let f = true; for (let r = 0; r < N; r++) if (!board[idx(r, c)]) { f = false; break; } if (f) cols.push(c); }
+    return { rows, cols };
+  }
+  function lineCells(rows, cols, board) {
+    const set = new Set();
+    rows.forEach(r => { for (let c = -M; c < N + M; c++) { const i = idx(r, c); if (board[i]) set.add(i); } });
+    cols.forEach(c => { for (let r = -M; r < N + M; r++) { const i = idx(r, c); if (board[i]) set.add(i); } });
+    return set;
+  }
+
+  // ---------- geometry ----------
+  const $ = id => document.getElementById(id);
+  const stage = $('stage'), frame = $('frame'), ghostLayer = $('ghosts'), trayEl = $('tray');
+
+  function currentView() {
+    let t = 0, b = N - 1, l = 0, rt = N - 1;
+    S.board.forEach((v, i) => {
+      if (!v) return;
+      const [r, c] = rcOf(i);
+      if (r < t) t = r; if (r > b) b = r; if (c < l) l = c; if (c > rt) rt = c;
+    });
+    return { r0: Math.max(-M, t - 1), r1: Math.min(N + M - 1, b + 1), c0: Math.max(-M, l - 1), c1: Math.min(N + M - 1, rt + 1) };
+  }
+  function layout(view) {
+    const v = view || currentView();
+    const Sz = stage.clientWidth;
+    const nR = v.r1 - v.r0 + 1, nC = v.c1 - v.c0 + 1;
+    const pitch = Sz / Math.max(nR, nC, BASE_VIEW);
+    const gap = Math.max(2, pitch * 0.1), size = pitch - gap;
+    const ox = (Sz - nC * pitch) / 2 + gap / 2, oy = (Sz - nR * pitch) / 2 + gap / 2;
+    return { v, pitch, gap, size, ox, oy, pos: (r, c) => ({ x: ox + (c - v.c0) * pitch, y: oy + (r - v.r0) * pitch }) };
+  }
+  let L = null;
+
+  // ---------- DOM ----------
+  const cellEls = [];
+  for (let i = 0; i < G * G; i++) {
+    const d = document.createElement('div');
+    d.className = 'cell off';
+    d.innerHTML = '<div class="in"></div>';
+    stage.insertBefore(d, ghostLayer);
+    cellEls.push(d);
+  }
+  const slotEls = [0, 1, 2].map(i => {
+    const s = document.createElement('div');
+    s.className = 'slot';
+    s.innerHTML = '<div class="cur"></div><div class="next"></div>';
+    trayEl.appendChild(s);
+    s.querySelector('.cur').addEventListener('pointerdown', e => onSlotDown(e, i));
+    s.addEventListener('click', () => { if (deleteMode) deleteSlot(i); });
+    return s;
+  });
+
+  function renderPiece(p, size, gap) {
+    const el = document.createElement('div');
+    el.className = 'piece';
+    const pitch = size + gap;
+    el.style.width = (p.w * pitch - gap) + 'px';
+    el.style.height = (p.h * pitch - gap) + 'px';
+    for (const [r, c] of p.cells) {
+      const b = document.createElement('div');
+      b.className = 'blk';
+      b.style.cssText = `left:${c * pitch}px;top:${r * pitch}px;width:${size}px;height:${size}px;--c:${p.color}`;
+      el.appendChild(b);
+    }
+    return el;
+  }
+
+  function traySizes() {
+    const w = slotEls[0].clientWidth - 8;
+    const cur = Math.max(10, Math.min(26, w / 5.5));
+    return { cur, curGap: Math.max(2, cur * 0.12), next: cur * 0.36, nextGap: 1 };
+  }
+  function renderSlot(i) {
+    const { cur, curGap, next, nextGap } = traySizes();
+    const s = S.slots[i], el = slotEls[i];
+    const curBox = el.querySelector('.cur'), nextBox = el.querySelector('.next');
+    curBox.innerHTML = ''; nextBox.innerHTML = '';
+    curBox.appendChild(renderPiece(s.cur, cur, curGap));
+    nextBox.appendChild(renderPiece(s.next, next, nextGap));
+    el.classList.toggle('nofit', !S.over && !anyFit(s.cur));
+  }
+  const renderTray = () => [0, 1, 2].forEach(renderSlot);
+  const refreshFit = () => S.slots.forEach((s, i) => slotEls[i].classList.toggle('nofit', !S.over && !anyFit(s.cur)));
+
+  function renderBoard({ dropped, view, newStars } = {}) {
+    L = layout(view);
+    const { v, size, pos } = L;
+    const starMap = new Map(S.stars.map(s => [s.i, s.left]));
+    for (let i = 0; i < G * G; i++) {
+      const el = cellEls[i], val = S.board[i];
+      const [r, c] = rcOf(i);
+      const p = pos(r, c);
+      el.style.transform = `translate(${p.x}px, ${p.y}px)`;
+      el.style.width = el.style.height = size + 'px';
+      const inView = r >= v.r0 && r <= v.r1 && c >= v.c0 && c <= v.c1;
+      el.className = 'cell ' + (inMain(r, c) ? 'main' : 'ext') + (inView ? '' : ' off') + (val ? ' filled' : '');
+      if (val) el.style.setProperty('--c', val); else el.style.removeProperty('--c');
+      if (dropped && dropped.has(i) && val) el.classList.add('drop');
+      const star = el.querySelector('.star');
+      if (starMap.has(i)) {
+        const html = `${STAR_SVG}<b>${starMap.get(i)}</b>`;
+        if (!star) { const s = document.createElement('div'); s.className = 'star' + (newStars && newStars.has(i) ? ' new' : ''); s.innerHTML = html; el.appendChild(s); }
+        else star.querySelector('b').textContent = starMap.get(i);
+      } else if (star) star.remove();
+    }
+    const tl = pos(0, 0);
+    const pad = L.gap / 2 + 3;
+    frame.style.transform = `translate(${tl.x - pad}px, ${tl.y - pad}px)`;
+    frame.style.width = frame.style.height = (N * L.pitch - L.gap + pad * 2) + 'px';
+  }
+
+  function renderHUD() {
+    $('score').textContent = S.score.toLocaleString();
+    $('best').textContent = bestScore().toLocaleString();
+    const h = S.helpers;
+    $('cSingle').textContent = h.single; $('cRotate').textContent = h.rotate; $('cDelete').textContent = h.del;
+    $('hSingle').disabled = !h.single || S.over;
+    $('hRotate').disabled = !h.rotate || S.over;
+    $('hDelete').disabled = !h.del || S.over;
+    const into = S.lines % LINES_PER_HELPER;
+    $('linesTxt').textContent = `Lines ${S.lines}`;
+    $('starTxt').textContent = `★ in ${LINES_PER_STAR - (S.lines % LINES_PER_STAR)}`;
+    $('nextTxt').textContent = `Helper in ${LINES_PER_HELPER - into}`;
+    $('barFill').style.width = (into / LINES_PER_HELPER * 100) + '%';
+  }
+
+  function renderAll() {
+    stage.classList.add('noanim');
+    renderBoard(); renderTray(); renderHUD();
+    requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.remove('noanim')));
+    checkState();
+  }
+
+  // ---------- effects ----------
+  const toastQ = []; let toasting = false;
+  function toast(msg) { toastQ.push(msg); if (!toasting) nextToast(); }
+  function nextToast() {
+    const t = $('toast');
+    if (!toastQ.length) { toasting = false; return; }
+    toasting = true;
+    t.textContent = toastQ.shift(); t.classList.add('show');
+    setTimeout(() => { t.classList.remove('show'); setTimeout(nextToast, 300); }, 2000);
+  }
+  function bumpScore() { const s = $('score'); s.classList.add('bump'); setTimeout(() => s.classList.remove('bump'), 180); }
+  function burst(clearing) {
+    let sx = 0, sy = 0, n = 0;
+    for (const [i, color] of clearing) {
+      const [r, c] = rcOf(i), p = L.pos(r, c);
+      const d = document.createElement('div');
+      d.className = 'burst';
+      d.style.cssText = `left:${p.x}px;top:${p.y}px;width:${L.size}px;height:${L.size}px;--c:${color};animation-delay:${(Math.abs(r) + Math.abs(c)) * 10}ms`;
+      stage.appendChild(d);
+      setTimeout(() => d.remove(), 900);
+      sx += p.x + L.size / 2; sy += p.y + L.size / 2; n++;
+    }
+    return { x: sx / n, y: sy / n };
+  }
+  function popText(x, y, pts, lines) {
+    const d = document.createElement('div');
+    d.className = 'pop';
+    d.style.left = x + 'px'; d.style.top = y + 'px';
+    d.innerHTML = `+${pts.toLocaleString()}` + (lines > 1 ? `<small>${lines} lines ×${lines}</small>` : '');
+    stage.appendChild(d);
+    setTimeout(() => d.remove(), 1000);
+  }
+
+  // ---------- core move ----------
+  function place(p, r0, c0) {
+    const dropped = new Set();
+    for (const [r, c] of p.cells) { const i = idx(r0 + r, c0 + c); S.board[i] = p.color; dropped.add(i); }
+    const { rows, cols } = linesFor(S.board);
+    const lines = rows.length + cols.length;
+    const clear = lineCells(rows, cols, S.board);
+
+    // stars: a starred square inside a cleared line awards a helper
+    const hitStars = S.stars.filter(s => clear.has(s.i));
+    S.stars = S.stars.filter(s => !clear.has(s.i)).map(s => ({ ...s, left: s.left - 1 })).filter(s => s.left > 0);
+
+    if (!lines) { renderBoard({ dropped }); return; }
+
+    // show the board as it looks with the piece in, then clear and resize
+    renderBoard({ dropped });
+    const clearing = [];
+    clear.forEach(i => { clearing.push([i, S.board[i]]); S.board[i] = null; });
+    const pts = clear.size * lines;
+    S.score += pts;
+    const prev = S.lines;
+    S.lines += lines;
+    const center = burst(clearing);
+    popText(center.x, center.y, pts, lines);
+    bumpScore();
+
+    hitStars.forEach(() => awardHelper('Star bonus! '));
+    const helpersEarned = Math.floor(S.lines / LINES_PER_HELPER) - Math.floor(prev / LINES_PER_HELPER);
+    for (let k = 0; k < helpersEarned; k++) awardHelper('');
+    const starsEarned = Math.floor(S.lines / LINES_PER_STAR) - Math.floor(prev / LINES_PER_STAR);
+    const newStars = new Set();
+    for (let k = 0; k < starsEarned; k++) { const i = addStar(); if (i != null) newStars.add(i); }
+
+    busy = true;
+    const keepView = L.v;
+    renderBoard({ view: keepView, newStars });
+    setTimeout(() => { busy = false; renderBoard(); refreshFit(); }, 380);
+  }
+
+  function addStar() {
+    const taken = new Set(S.stars.map(s => s.i));
+    const options = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) { const i = idx(r, c); if (!taken.has(i)) options.push(i); }
+    if (!options.length) return null;
+    const i = options[Math.floor(Math.random() * options.length)];
+    S.stars.push({ i, left: STAR_PLAYS });
+    toast('Star! Clear it within 5 plays for a helper');
+    return i;
+  }
+
+  function awardHelper(prefix) {
+    const types = [['single', 'Single square'], ['rotate', 'Rotate'], ['del', 'Delete']];
+    const [key, name] = types[Math.floor(Math.random() * types.length)];
+    S.helpers[key]++;
+    toast(`${prefix}New helper: ${name}`);
+  }
+
+  function advanceSlot(i) {
+    const el = slotEls[i];
+    const oldNext = el.querySelector('.next .piece');
+    const from = oldNext && oldNext.getBoundingClientRect();
+    S.slots[i].cur = S.slots[i].next;
+    S.slots[i].next = randomPiece();
+    renderSlot(i);
+    const newCur = el.querySelector('.cur .piece');
+    const newNext = el.querySelector('.next .piece');
+    if (from && newCur) {
+      const to = newCur.getBoundingClientRect();
+      const dx = (from.left + from.width / 2) - (to.left + to.width / 2);
+      const dy = (from.top + from.height / 2) - (to.top + to.height / 2);
+      const sc = from.width / to.width;
+      newCur.animate([
+        { transform: `translate(${dx}px, ${dy}px) scale(${sc})`, opacity: .45 },
+        { transform: 'none', opacity: 1 }
+      ], { duration: 420, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    }
+    if (newNext) newNext.classList.add('enter');
+  }
+
+  function afterMove() { renderHUD(); refreshFit(); checkState(); save(); }
+
+  function checkState() {
+    if (S.over) return;
+    const st = $('status');
+    if (deleteMode) return;
+    if (S.slots.some(s => anyFit(s.cur))) { st.classList.remove('show'); return; }
+    const h = S.helpers;
+    const mainEmpty = (() => { for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!S.board[idx(r, c)]) return true; return false; })();
+    const canHelp =
+      (h.single > 0 && mainEmpty) ||
+      (h.rotate > 0 && S.slots.some(s => [1, 2, 3].some(t => anyFit(rotatePiece(s.cur, t))))) ||
+      (h.del > 0 && S.slots.some(s => anyFit(s.next)));
+    if (canHelp) { st.textContent = 'No pieces fit — use a helper!'; st.classList.add('show'); }
+    else { st.classList.remove('show'); gameOver(); }
+  }
+
+  // ---------- game over / scores ----------
+  function recordScore(score) {
+    const prevBest = bestScore();
+    const entry = { score, date: Date.now() };
+    if (score > 0) {
+      const list = getScores();
+      list.push(entry);
+      list.sort((a, b) => b.score - a.score || a.date - b.date);
+      store.set(K_SCORES, list.slice(0, 5));
+    }
+    return { isRecord: score > 0 && score > prevBest, entry };
+  }
+  function gameOver() {
+    S.over = true;
+    store.del(K_STATE);
+    store.set(K_HELPERS, S.helpers);
+    const { isRecord, entry } = recordScore(S.score);
+    renderHUD(); refreshFit();
+    const kept = S.helpers.single + S.helpers.rotate + S.helpers.del;
+    setTimeout(() => {
+      openModal(`
+        <h2>Game over</h2>
+        <p>No more pieces fit on the board.</p>
+        ${isRecord ? '<div class="record">New record!</div>' : ''}
+        <div class="big">${S.score.toLocaleString()}</div>
+        <p>${S.lines} line${S.lines === 1 ? '' : 's'} cleared${kept ? ` · ${kept} helper${kept === 1 ? '' : 's'} carried to next game` : ''}</p>
+        ${scoresHTML(entry.date)}
+        <button class="btn" data-act="new">Play again</button>`);
+    }, 700);
+  }
+  function scoresHTML(highlightDate) {
+    const list = getScores();
+    if (!list.length) return '<p>No scores yet. Finish a game to set one.</p>';
+    return '<ol class="scores">' + list.map((s, i) => `
+      <li class="${s.date === highlightDate ? 'me' : ''}">
+        <span class="rk">${i + 1}</span>
+        <span class="sc">${s.score.toLocaleString()}</span>
+        <span class="dt">${new Date(s.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+      </li>`).join('') + '</ol>';
+  }
+
+  // ---------- modal ----------
+  const modal = $('modal'), modalCard = $('modalCard');
+  function openModal(html) { modalCard.innerHTML = html; modal.classList.remove('hidden'); }
+  function closeModal() { modal.classList.add('hidden'); }
+  modal.addEventListener('click', e => {
+    if (e.target === modal) { if (!S.over) closeModal(); return; }
+    const act = e.target.closest('[data-act]');
+    if (!act) return;
+    const a = act.dataset.act;
+    if (a === 'close') closeModal();
+    if (a === 'new') { closeModal(); newGame(); }
+    if (a === 'abandon') { recordScore(S.score); closeModal(); newGame(); }
+    if (a.startsWith('rot')) { closeModal(); doRotate(+a.slice(3)); }
+  });
+  $('scoreBtn').addEventListener('click', () => {
+    openModal(`<h2>Top scores</h2>${scoresHTML()}<div class="btns"><button class="btn" data-act="close">Close</button></div>`);
+  });
+  $('newBtn').addEventListener('click', () => {
+    if (S.over || S.score === 0) { newGame(); return; }
+    openModal(`<h2>New game?</h2><p>Your current score of <b>${S.score.toLocaleString()}</b> will be saved to your scores. Unused helpers carry over.</p>
+      <div class="btns"><button class="btn ghostbtn" data-act="close">Keep playing</button><button class="btn" data-act="abandon">New game</button></div>`);
+  });
+
+  function newGame() {
+    const helpers = S ? { ...S.helpers } : savedHelpers();
+    S = freshState(helpers);
+    setDeleteMode(false);
+    $('status').classList.remove('show');
+    renderAll();
+    save();
+  }
+
+  // ---------- helpers ----------
+  let deleteMode = false;
+  function setDeleteMode(on) {
+    deleteMode = on;
+    document.body.classList.toggle('deleting', on);
+    $('hDelete').classList.toggle('active', on);
+    const st = $('status');
+    if (on) { st.textContent = 'Tap a piece to delete it — tap Delete again to cancel'; st.classList.add('show'); }
+    else { st.classList.remove('show'); if (S) checkState(); }
+  }
+  $('hDelete').addEventListener('click', () => { if (S.helpers.del > 0 && !S.over) setDeleteMode(!deleteMode); });
+  function deleteSlot(i) {
+    if (!deleteMode || S.helpers.del <= 0) return;
+    S.helpers.del--;
+    setDeleteMode(false);
+    const p = slotEls[i].querySelector('.cur .piece');
+    const finish = () => { advanceSlot(i); afterMove(); };
+    if (p) p.animate([{ transform: 'none', opacity: 1 }, { transform: 'scale(.2) rotate(-25deg)', opacity: 0 }], { duration: 220, easing: 'ease-in' }).onfinish = finish;
+    else finish();
+  }
+
+  $('hRotate').addEventListener('click', () => {
+    if (!S.helpers.rotate || S.over) return;
+    setDeleteMode(false);
+    const opt = (t, label) => {
+      const prev = S.slots.map(s => {
+        const rp = rotatePiece(s.cur, t);
+        const size = Math.min(9, 40 / Math.max(rp.w, rp.h));
+        return renderPiece(rp, size, 1.5).outerHTML;
+      }).join('');
+      return `<button class="rot-opt" data-act="rot${t}"><b>${label}</b><span class="prev">${prev}</span></button>`;
+    };
+    openModal(`<h2>Rotate pieces</h2><p>All three pieces turn clockwise.</p>
+      <div class="rot-opts">${opt(1, '90°')}${opt(2, '180°')}${opt(3, '270°')}</div>
+      <div class="btns"><button class="btn ghostbtn" data-act="close">Cancel</button></div>`);
+  });
+  function doRotate(t) {
+    if (!S.helpers.rotate) return;
+    S.helpers.rotate--;
+    S.slots.forEach(s => { s.cur = rotatePiece(s.cur, t); });
+    renderTray();
+    slotEls.forEach(el => {
+      const p = el.querySelector('.cur .piece');
+      if (p) p.animate([{ transform: `rotate(${-90 * t}deg) scale(.8)` }, { transform: 'none' }], { duration: 360, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    });
+    afterMove();
+  }
+
+  $('hSingle').addEventListener('pointerdown', e => {
+    if (!S.helpers.single || S.over) return;
+    setDeleteMode(false);
+    startDrag(e, { cells: [[0, 0]], w: 1, h: 1, color: SINGLE_COLOR, id: 0 }, { type: 'single' });
+  });
+
+  // ---------- drag & drop ----------
+  let drag = null;
+  function onSlotDown(e, i) {
+    if (deleteMode || S.over) return;
+    if (slotEls[i].classList.contains('nofit')) {
+      const p = slotEls[i].querySelector('.cur .piece');
+      if (p) { p.classList.remove('shake'); void p.offsetWidth; p.classList.add('shake'); }
+      return;
+    }
+    startDrag(e, S.slots[i].cur, { type: 'slot', i });
+  }
+  function startDrag(e, piece, source) {
+    if (drag || busy || e.button > 0) return;
+    e.preventDefault();
+    const lay = L;
+    const el = renderPiece(piece, lay.size, lay.gap);
+    el.classList.add('floating');
+    document.body.appendChild(el);
+    const w = piece.w * lay.pitch - lay.gap, h = piece.h * lay.pitch - lay.gap;
+    // Lift the piece so its bottom edge sits clearly above the finger (or cursor).
+    const touch = e.pointerType !== 'mouse';
+    const lift = h / 2 + (touch ? Math.max(56, lay.pitch * 1.6) : 22);
+    let srcEl = null;
+    if (source.type === 'slot') { srcEl = slotEls[source.i].querySelector('.cur .piece'); srcEl && srcEl.classList.add('dragging-src'); }
+    const startScale = srcEl ? Math.min(1, srcEl.getBoundingClientRect().width / w) : .5;
+    drag = {
+      piece, source, el, lay, w, h, lift, startScale, target: null, srcEl, pid: e.pointerId,
+      sr: stage.getBoundingClientRect(), px: e.clientX, py: e.clientY, t0: performance.now()
+    };
+    positionDrag();
+    const tick = () => { if (!drag || drag.el !== el) return; positionDrag(); if (performance.now() - drag.t0 < LIFT_MS + 20) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+    window.addEventListener('pointermove', moveDrag, { passive: false });
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', cancelDrag);
+  }
+  const LIFT_MS = 180;
+  let hintCells = [];
+  function clearGhost() { ghostLayer.innerHTML = ''; hintCells.forEach(i => cellEls[i].classList.remove('hint')); hintCells = []; }
+  function moveDrag(e) {
+    if (!drag || e.pointerId !== drag.pid) return;
+    e.preventDefault();
+    drag.px = e.clientX; drag.py = e.clientY;
+    positionDrag();
+  }
+  // Places the floating piece (animated nudge up + grow), then targets the cells under
+  // the piece as it is drawn — not under the pointer.
+  function positionDrag() {
+    const d = drag, lay = d.lay;
+    const t = Math.min(1, (performance.now() - d.t0) / LIFT_MS);
+    const ease = 1 - Math.pow(1 - t, 3);
+    const lift = d.lift * ease;
+    const scale = d.startScale + (1 - d.startScale) * ease;
+    const x = d.px - d.w / 2, y = d.py - d.h / 2 - lift;
+    d.el.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+    d.vis = { x, y };
+    const c = Math.round((x - d.sr.left - lay.ox) / lay.pitch) + lay.v.c0;
+    const r = Math.round((y - d.sr.top - lay.oy) / lay.pitch) + lay.v.r0;
+    const key = r + ',' + c;
+    if (key === d.key) return;
+    d.key = key;
+    clearGhost();
+    if (!canPlace(d.piece, r, c)) { d.target = null; return; }
+    d.target = [r, c];
+    const tmp = S.board.slice();
+    for (const [pr, pc] of d.piece.cells) {
+      const rr = r + pr, cc = c + pc;
+      tmp[idx(rr, cc)] = d.piece.color;
+      const p = lay.pos(rr, cc);
+      const g = document.createElement('div');
+      g.className = 'ghost';
+      g.style.cssText = `left:${p.x}px;top:${p.y}px;width:${lay.size}px;height:${lay.size}px;--c:${d.piece.color}`;
+      ghostLayer.appendChild(g);
+    }
+    const { rows, cols } = linesFor(tmp);
+    lineCells(rows, cols, S.board).forEach(i => { cellEls[i].classList.add('hint'); hintCells.push(i); });
+    // also highlight empty main-span squares in those lines that the piece fills
+    rows.concat().forEach(rr => { for (let k = 0; k < N; k++) { const i = idx(rr, k); if (!S.board[i]) { cellEls[i].classList.add('hint'); hintCells.push(i); } } });
+    cols.forEach(cc => { for (let k = 0; k < N; k++) { const i = idx(k, cc); if (!S.board[i]) { cellEls[i].classList.add('hint'); hintCells.push(i); } } });
+  }
+  function teardown() {
+    window.removeEventListener('pointermove', moveDrag);
+    window.removeEventListener('pointerup', endDrag);
+    window.removeEventListener('pointercancel', cancelDrag);
+    clearGhost();
+  }
+  function endDrag(e) {
+    if (!drag || e.pointerId !== drag.pid) return;
+    const d = drag; drag = null;
+    teardown();
+    if (d.target) {
+      d.el.remove();
+      place(d.piece, d.target[0], d.target[1]);
+      if (d.source.type === 'slot') advanceSlot(d.source.i);
+      else if (d.source.type === 'single') S.helpers.single--;
+      afterMove();
+    } else snapBack(d);
+  }
+  function cancelDrag(e) {
+    if (!drag || e.pointerId !== drag.pid) return;
+    const d = drag; drag = null; teardown(); snapBack(d);
+  }
+  function snapBack(d) {
+    const target = d.srcEl || (d.source.type === 'single' ? $('hSingle') : null);
+    if (!target) { d.el.remove(); return; }
+    const r = target.getBoundingClientRect();
+    const sc = d.srcEl ? r.width / d.w : .3;
+    const tx = r.left + r.width / 2 - d.w / 2, ty = r.top + r.height / 2 - d.h / 2;
+    const anim = d.el.animate([{ transform: d.el.style.transform }, { transform: `translate(${tx}px, ${ty}px) scale(${sc})` }], { duration: 200, easing: 'ease-out' });
+    anim.onfinish = () => { d.el.remove(); d.srcEl && d.srcEl.classList.remove('dragging-src'); };
+  }
+
+  // ---------- init ----------
+  window.addEventListener('resize', () => { if (S) { stage.classList.add('noanim'); renderBoard(); renderTray(); requestAnimationFrame(() => stage.classList.remove('noanim')); } });
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('touchmove', e => { if (drag) e.preventDefault(); }, { passive: false });
+
+  const saved = store.get(K_STATE, null);
+  if (saved && saved.board && saved.board.length === G * G && !saved.over) {
+    S = saved;
+    S.helpers = Object.assign({ single: 0, rotate: 0, del: 0 }, S.helpers);
+    S.stars = S.stars || [];
+    uid = 1 + Math.max(0, ...S.slots.flatMap(s => [s.cur.id, s.next.id]));
+    renderAll();
+  } else newGame();
+
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+
+  window.__bt = { get S() { return S; }, idx, canPlace, anyFit, render: renderAll, renderBoard, place, afterMove, addStar };
+})();
+</script>
+</body>
+</html>
