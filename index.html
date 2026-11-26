@@ -33,14 +33,14 @@
     padding: calc(env(safe-area-inset-top) + 8px) 12px calc(env(safe-area-inset-bottom) + 8px);
   }
   header { width: var(--size); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .title { font-weight: 800; font-size: 22px; letter-spacing: .3px; }
+  .title { font-weight: 800; font-size: 21px; letter-spacing: .3px; white-space: nowrap; }
   .title span { color: var(--accent); }
   .hdr-right { display: flex; gap: 8px; align-items: center; }
   #scoreBtn {
     background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 1px 2px rgba(20,30,60,.06);
     padding: 6px 14px; display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; min-width: 108px;
   }
-  #scoreBtn small { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  #scoreBtn small { white-space: nowrap; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
   #score { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; transition: transform .15s, color .15s; }
   #score.bump { transform: scale(1.18); color: var(--accent); }
   .icon-btn {
@@ -122,6 +122,51 @@
   #status { width: var(--size); text-align: center; font-size: 13px; font-weight: 700; color: var(--danger); display: none; }
   #status.show { display: block; }
 
+  #modeBadge {
+    white-space: nowrap; font-style: normal; font-size: 11px; font-weight: 800; letter-spacing: .5px; vertical-align: middle;
+    background: var(--line); color: var(--muted); padding: 3px 8px; border-radius: 99px; margin-left: 4px;
+  }
+  #modeBadge.crazy { background: linear-gradient(90deg, #ff6b6b, #f5a524, #ab47bc); color: #fff; }
+  .cell.ext.closed .in { background: repeating-linear-gradient(45deg, #eceef2 0 3px, #f6f7f9 3px 6px); opacity: .7; }
+  .hidden-next {
+    width: 22px; height: 22px; border-radius: 6px; border: 1.5px dashed #c3cbdb; color: #a3acbf;
+    display: grid; place-items: center; font-size: 12px; font-weight: 800;
+  }
+  .card .sub { font-size: 13px; margin: 8px 0 6px; }
+  .card .empty { margin: 16px 0; }
+  .lvl-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .lvl {
+    display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 8px 2px; border-radius: 12px;
+    border: 1px solid var(--line); background: color-mix(in srgb, #43a047 calc((1 - var(--t)) * 14%), color-mix(in srgb, #e5484d calc(var(--t) * 16%), #fff));
+  }
+  .lvl:hover { border-color: var(--accent); }
+  .lvl b { font-size: 20px; line-height: 1.1; }
+  .lvl span { font-size: 10px; font-weight: 700; }
+  .lvl small { font-size: 9px; color: var(--muted); }
+  .crazy-btn {
+    width: 100%; margin-top: 10px; padding: 12px; border-radius: 14px; border: 0; color: #fff; text-align: left;
+    background: linear-gradient(110deg, #ef5350, #f5a524 50%, #ab47bc); display: flex; flex-direction: column; gap: 3px;
+    box-shadow: 0 6px 18px rgba(171,71,188,.3);
+  }
+  .crazy-btn b { font-size: 17px; }
+  .crazy-btn span { font-size: 12px; opacity: .95; line-height: 1.3; }
+  .crazy-btn small { font-size: 11px; font-weight: 700; opacity: .9; }
+  .btn.resume { width: 100%; margin: 6px 0 4px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-top: 10px; }
+  .tab { min-width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line); background: #fff; font-size: 12px; font-weight: 700; padding: 0 6px; }
+  .tab.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tab.crazy.on { background: linear-gradient(90deg, #ef5350, #ab47bc); border-color: transparent; }
+
+  .meter { display: flex; gap: 3px; justify-content: center; margin: 6px 0 10px; }
+  .meter i { width: 18px; height: 6px; border-radius: 3px; background: var(--line); }
+  .meter i.on { background: color-mix(in srgb, #e5484d calc(var(--t) * 100%), #43a047); }
+  dl.settings { text-align: left; margin: 8px 0 4px; font-size: 13px; line-height: 1.45; }
+  dl.settings dt { font-weight: 800; font-size: 11px; letter-spacing: .6px; text-transform: uppercase; color: var(--accent); margin-top: 10px; }
+  dl.settings dd { margin: 2px 0 0; color: var(--text); }
+  .card details { text-align: left; margin-top: 10px; font-size: 13px; }
+  .card summary { cursor: pointer; font-weight: 700; color: var(--muted); }
+  .btn.start { min-width: 120px; }
+
   /* ---------- tray ---------- */
   #tray { width: var(--size); display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .slot { display: flex; flex-direction: column; align-items: center; border-radius: 14px; border: 2px dashed transparent; transition: border-color .2s, background .2s; }
@@ -141,8 +186,30 @@
   @keyframes enter { from { opacity: 0; transform: translateY(10px) scale(.4); } to { opacity: 1; transform: none; } }
   .floating { position: fixed; left: 0; top: 0; z-index: 50; pointer-events: none; filter: drop-shadow(0 10px 14px rgba(20,30,60,.28)); }
 
+  #lvlPop {
+    position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 8px); z-index: 70; width: min(360px, calc(100vw - 24px));
+    border-radius: 16px; padding: 12px 14px; box-shadow: 0 12px 32px rgba(20,30,60,.22); cursor: pointer;
+    border: 2px solid transparent; background: linear-gradient(#fff, #fff) padding-box, linear-gradient(110deg, #ef5350, #f5a524, #ab47bc) border-box;
+    transform: translate(-50%, -140%); transition: transform .4s cubic-bezier(.2,.9,.25,1.15); pointer-events: none;
+  }
+  #lvlPop.show { transform: translate(-50%, 0); pointer-events: auto; }
+  #lvlPop .lp-top { display: flex; align-items: center; gap: 10px; }
+  #lvlPop .lp-lvl { font-weight: 900; font-size: 18px; color: #fff; background: linear-gradient(110deg, #ef5350, #ab47bc); border-radius: 10px; padding: 6px 9px; }
+  #lvlPop strong { display: block; font-size: 15px; }
+  #lvlPop small { color: var(--muted); font-size: 12px; }
+  #lvlPop ul { margin: 8px 0 0; padding: 0 0 0 18px; font-size: 12.5px; color: var(--text); line-height: 1.55; }
+  #lvlPop ul:empty { display: none; }
+  #updateBtn {
+    position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 16px); transform: translateX(-50%); z-index: 80;
+    display: flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 12px 18px;
+    background: var(--accent); color: #fff; font-weight: 800; font-size: 14px; white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(47,128,237,.4); animation: upIn .4s ease-out;
+  }
+  #updateBtn[hidden] { display: none; }
+  #updateBtn svg { width: 18px; height: 18px; }
+  @keyframes upIn { from { transform: translate(-50%, 30px); opacity: 0; } }
   #toast {
-    position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 70px); transform: translate(-50%, -20px);
+    position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 76px); transform: translate(-50%, 20px);
     background: var(--text); color: #fff; font-weight: 700; padding: 10px 18px; border-radius: 999px;
     opacity: 0; transition: all .3s; z-index: 60; pointer-events: none; font-size: 14px; white-space: nowrap;
     box-shadow: 0 6px 20px rgba(20,30,60,.25);
@@ -156,7 +223,7 @@
   .overlay.hidden { display: none; }
   .card {
     background: var(--panel); border-radius: 18px; padding: 22px; box-shadow: 0 20px 50px rgba(20,30,60,.25);
-    width: min(360px, 100%); text-align: center; animation: cardIn .25s ease-out;
+    width: min(380px, 100%); text-align: center; animation: cardIn .25s ease-out; max-height: 92vh; overflow-y: auto;
   }
   @keyframes cardIn { from { transform: scale(.92); opacity: 0; } to { transform: none; opacity: 1; } }
   .card h2 { margin: 0 0 6px; font-size: 22px; }
@@ -183,7 +250,7 @@
 <body>
 <div id="app">
   <header>
-    <div class="title">Block<span>tet</span></div>
+    <div class="title">Block<span>tet</span> <em id="modeBadge">Level 3</em></div>
     <div class="hdr-right">
       <button id="scoreBtn" aria-label="Score — view top scores">
         <small>Score · Best <span id="best">0</span></small>
@@ -217,31 +284,65 @@
 </div>
 
 <div id="toast"></div>
+<div id="lvlPop" role="status"></div>
+<button id="updateBtn" hidden>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+  <span>Update available — tap to update</span>
+</button>
 <div id="modal" class="overlay hidden"><div class="card" id="modalCard"></div></div>
 
 <script>
 (() => {
   // ---------- constants ----------
+  const APP_VERSION = '7';    // keep in sync with version.json and the cache name in sw.js
   const N = 10;               // main play area
   const M = 1;                // max overhang beyond the main area (one ring)
   const G = N + 2 * M;        // full virtual grid (18)
   const BASE_VIEW = N + 2;    // main + one gray ring
-  const LINES_PER_HELPER = 25;
-  const LINES_PER_STAR = 10;
-  const STAR_PLAYS = 5;
   const COLORS = ['#ef5350', '#fb8c00', '#fbc02d', '#43a047', '#26a69a', '#1e88e5', '#5c6bc0', '#ab47bc', '#ec407a'];
   const SINGLE_COLOR = '#f5a524';
+  // size class: 0 = small (favored when easy), 1 = medium, 2 = big/awkward (favored when hard)
   const SHAPES = [
-    ['#'],                                   // A single
-    ['##'], ['###'], ['####'], ['#####'],    // B C D E lines
-    ['##', '##'], ['###', '###'], ['###', '###', '###'], // F G H
-    ['#.', '##'],                            // I small corner
-    ['#..', '###'], ['..#', '###'],          // J L, K mirror L
-    ['###', '.#.'],                          // L T
-    ['.##', '##.'], ['##.', '.##'],          // M S, N Z
-    ['#.', '.#'], ['#..', '.#.', '..#']      // V W diagonals
+    [['#'], 0],                                            // A single
+    [['##'], 0], [['###'], 0], [['####'], 1], [['#####'], 2], // B C D E lines
+    [['##', '##'], 1], [['###', '###'], 2], [['###', '###', '###'], 2], // F G H
+    [['#.', '##'], 0],                                     // I small corner
+    [['#..', '###'], 1], [['..#', '###'], 1],              // J L, K mirror L
+    [['###', '.#.'], 1],                                   // L T
+    [['.##', '##.'], 1], [['##.', '.##'], 1],              // M S, N Z
+    [['#.', '.#'], 2], [['#..', '.#.', '..#'], 2]          // V W diagonals
   ];
-  const K_SCORES = 'blocktet.scores', K_STATE = 'blocktet.state', K_HELPERS = 'blocktet.helpers';
+
+  // ---------- difficulty levels ----------
+  // big: weight multiplier for big/awkward shapes (small shapes get 1/big)
+  // helper: lines per helper · star: lines per star · plays: plays a star lasts
+  // previews: how many rack slots show their next piece · ring: overhang ring open
+  // single: whether the 1-square piece can appear as a random piece
+  const LEVELS = [
+    { name: 'Breezy',     big: 0.5,  helper: 15, star: 8,  plays: 6, previews: 3, ring: true,  single: true },
+    { name: 'Easy',       big: 0.75, helper: 20, star: 10, plays: 5, previews: 3, ring: true,  single: true },
+    { name: 'Relaxed',    big: 1,    helper: 25, star: 10, plays: 5, previews: 3, ring: true,  single: true },
+    { name: 'Steady',     big: 1.25, helper: 30, star: 12, plays: 4, previews: 3, ring: true,  single: true },
+    { name: 'Moderate',   big: 1.5,  helper: 35, star: 12, plays: 4, previews: 2, ring: true,  single: true },
+    { name: 'Tricky',     big: 1.75, helper: 40, star: 15, plays: 3, previews: 2, ring: true,  single: true },
+    { name: 'Tough',      big: 2,    helper: 45, star: 15, plays: 3, previews: 2, ring: true,  single: true },
+    { name: 'Hard',       big: 2.25, helper: 50, star: 18, plays: 3, previews: 1, ring: true,  single: true },
+    { name: 'Brutal',     big: 2.5,  helper: 60, star: 20, plays: 3, previews: 1, ring: false, single: true },
+    { name: 'Impossible', big: 3,    helper: 75, star: 25, plays: 2, previews: 1, ring: false, single: false }
+  ];
+  const CRAZY_STEP = 10; // lines per notch in Crazy mode
+  // Crazy sequence: 1..10, then 2..10, 3..10, … 9..10, then 10 forever.
+  const CRAZY_SEQ = [];
+  for (let s = 1; s <= 10; s++) for (let l = s; l <= 10; l++) CRAZY_SEQ.push(l);
+  const levelFor = (mode, lines) => mode === 'crazy'
+    ? (CRAZY_SEQ[Math.floor(lines / CRAZY_STEP)] || 10)
+    : mode;
+  const modeLabel = m => m === 'crazy' ? 'Crazy mode' : `Level ${m} · ${LEVELS[m - 1].name}`;
+  const PREVIEW_SLOTS = { 3: [0, 1, 2], 2: [0, 2], 1: [1] };
+
+  const K_STATE = 'blocktet.state';
+  const kScores = m => `blocktet.scores.${m === 'crazy' ? 'crazy' : 'L' + m}`;
+  const kHelpers = m => `blocktet.helpers.${m === 'crazy' ? 'crazy' : 'L' + m}`;
   const STAR_SVG = '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" fill="#f5a524" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 
   const idx = (r, c) => (r + M) * G + (c + M);
@@ -255,11 +356,17 @@
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
     del(k) { try { localStorage.removeItem(k); } catch {} }
   };
-  // carry over scores from the earlier "Grid Drop" build
-  if (!store.get(K_SCORES, null) && store.get('griddrop.scores', null)) store.set(K_SCORES, store.get('griddrop.scores'));
-  const getScores = () => store.get(K_SCORES, []);
-  const bestScore = () => (getScores()[0] || { score: 0 }).score;
-  const savedHelpers = () => Object.assign({ single: 0, rotate: 0, del: 0 }, store.get(K_HELPERS, {}));
+  // Earlier builds had a single score list and helper pool; they match Level 3 (Relaxed).
+  (() => {
+    const old = store.get('blocktet.scores', null) || store.get('griddrop.scores', null);
+    if (old && !store.get(kScores(3), null)) store.set(kScores(3), old);
+    const oldH = store.get('blocktet.helpers', null);
+    if (oldH && !store.get(kHelpers(3), null)) store.set(kHelpers(3), oldH);
+    store.del('blocktet.scores'); store.del('blocktet.helpers');
+  })();
+  const getScores = m => store.get(kScores(m), []);
+  const bestScore = m => (getScores(m)[0] || { score: 0 }).score;
+  const savedHelpers = m => Object.assign({ single: 0, rotate: 0, del: 0 }, store.get(kHelpers(m), {}));
 
   // ---------- pieces ----------
   let uid = 1;
@@ -278,34 +385,48 @@
     for (let i = 0; i < times % 4; i++) cur = norm(cur.cells.map(([r, c]) => [c, cur.h - 1 - r]));
     return { ...p, ...cur };
   }
-  function randomPiece() {
-    const base = parse(SHAPES[Math.floor(Math.random() * SHAPES.length)]);
+  function randomPiece(level) {
+    const cf = LEVELS[(level || curLevel()) - 1];
+    const weights = SHAPES.map(([rows, cls], k) => {
+      if (k === 0 && !cf.single) return 0;
+      return cls === 2 ? cf.big : cls === 0 ? 1 / cf.big : 1;
+    });
+    let roll = Math.random() * weights.reduce((a, b) => a + b, 0), k = 0;
+    while (roll >= weights[k]) { roll -= weights[k]; k++; }
+    const base = parse(SHAPES[k][0]);
     const p = { ...base, color: COLORS[Math.floor(Math.random() * COLORS.length)], id: uid++ };
     return rotatePiece(p, Math.floor(Math.random() * 4));
   }
 
   // ---------- state ----------
   let S, busy = false;
-  function freshState(helpers) {
+  const curLevel = () => levelFor(S.mode, S.lines);
+  const cfg = () => LEVELS[curLevel() - 1];
+  function freshState(mode) {
+    const lv = levelFor(mode, 0);
     return {
-      board: Array(G * G).fill(null),
-      slots: [0, 1, 2].map(() => ({ cur: randomPiece(), next: randomPiece() })),
-      helpers, stars: [], score: 0, lines: 0, over: false
+      mode, board: Array(G * G).fill(null),
+      slots: [0, 1, 2].map(() => ({ cur: randomPiece(lv), next: randomPiece(lv) })),
+      helpers: mode === 'crazy' ? { single: 0, rotate: 0, del: 0 } : savedHelpers(mode), stars: [], score: 0, lines: 0, hProg: 0, sProg: 0, over: false
     };
   }
+  function saveHelpers() { if (S && S.mode !== 'crazy') store.set(kHelpers(S.mode), S.helpers); }
   function save() {
-    store.set(K_HELPERS, S.helpers);
+    saveHelpers();
     if (!S.over) store.set(K_STATE, S);
   }
 
   // A placement is legal when every square is empty, within the overhang,
-  // and at least one square is inside the main 10x10 area.
+  // and at least one square is inside the main 10x10 area. When the level
+  // closes the ring, every square must be inside the main area.
   function canPlace(p, r0, c0) {
+    const ring = cfg().ring;
     let touchesMain = false;
     for (const [r, c] of p.cells) {
       const rr = r0 + r, cc = c0 + c;
       if (!inGrid(rr, cc) || S.board[idx(rr, cc)]) return false;
       if (inMain(rr, cc)) touchesMain = true;
+      else if (!ring) return false;
     }
     return touchesMain;
   }
@@ -397,7 +518,8 @@
     const curBox = el.querySelector('.cur'), nextBox = el.querySelector('.next');
     curBox.innerHTML = ''; nextBox.innerHTML = '';
     curBox.appendChild(renderPiece(s.cur, cur, curGap));
-    nextBox.appendChild(renderPiece(s.next, next, nextGap));
+    if (PREVIEW_SLOTS[cfg().previews].includes(i)) nextBox.appendChild(renderPiece(s.next, next, nextGap));
+    else nextBox.innerHTML = '<span class="hidden-next">?</span>';
     el.classList.toggle('nofit', !S.over && !anyFit(s.cur));
   }
   const renderTray = () => [0, 1, 2].forEach(renderSlot);
@@ -407,6 +529,7 @@
     L = layout(view);
     const { v, size, pos } = L;
     const starMap = new Map(S.stars.map(s => [s.i, s.left]));
+    const ringOpen = cfg().ring;
     for (let i = 0; i < G * G; i++) {
       const el = cellEls[i], val = S.board[i];
       const [r, c] = rcOf(i);
@@ -414,7 +537,7 @@
       el.style.transform = `translate(${p.x}px, ${p.y}px)`;
       el.style.width = el.style.height = size + 'px';
       const inView = r >= v.r0 && r <= v.r1 && c >= v.c0 && c <= v.c1;
-      el.className = 'cell ' + (inMain(r, c) ? 'main' : 'ext') + (inView ? '' : ' off') + (val ? ' filled' : '');
+      el.className = 'cell ' + (inMain(r, c) ? 'main' : 'ext' + (ringOpen ? '' : ' closed')) + (inView ? '' : ' off') + (val ? ' filled' : '');
       if (val) el.style.setProperty('--c', val); else el.style.removeProperty('--c');
       if (dropped && dropped.has(i) && val) el.classList.add('drop');
       const star = el.querySelector('.star');
@@ -432,17 +555,22 @@
 
   function renderHUD() {
     $('score').textContent = S.score.toLocaleString();
-    $('best').textContent = bestScore().toLocaleString();
+    $('best').textContent = bestScore(S.mode).toLocaleString();
+    const lv = curLevel();
+    $('modeBadge').textContent = S.mode === 'crazy' ? `Crazy ${lv}/10` : `Level ${lv}`;
+    $('modeBadge').classList.toggle('crazy', S.mode === 'crazy');
     const h = S.helpers;
     $('cSingle').textContent = h.single; $('cRotate').textContent = h.rotate; $('cDelete').textContent = h.del;
     $('hSingle').disabled = !h.single || S.over;
     $('hRotate').disabled = !h.rotate || S.over;
     $('hDelete').disabled = !h.del || S.over;
-    const into = S.lines % LINES_PER_HELPER;
-    $('linesTxt').textContent = `Lines ${S.lines}`;
-    $('starTxt').textContent = `★ in ${LINES_PER_STAR - (S.lines % LINES_PER_STAR)}`;
-    $('nextTxt').textContent = `Helper in ${LINES_PER_HELPER - into}`;
-    $('barFill').style.width = (into / LINES_PER_HELPER * 100) + '%';
+    const cf = cfg();
+    $('linesTxt').textContent = S.mode === 'crazy'
+      ? `Lines ${S.lines} · next ${lv === 10 && Math.floor(S.lines / CRAZY_STEP) >= CRAZY_SEQ.length - 1 ? 'max' : 'in ' + (CRAZY_STEP - S.lines % CRAZY_STEP)}`
+      : `Lines ${S.lines}`;
+    $('starTxt').textContent = `★ in ${Math.max(1, cf.star - S.sProg)}`;
+    $('nextTxt').textContent = `Helper in ${Math.max(1, cf.helper - S.hProg)}`;
+    $('barFill').style.width = Math.min(100, S.hProg / cf.helper * 100) + '%';
   }
 
   function renderAll() {
@@ -505,18 +633,23 @@
     clear.forEach(i => { clearing.push([i, S.board[i]]); S.board[i] = null; });
     const pts = clear.size * lines;
     S.score += pts;
-    const prev = S.lines;
+    const prevLevel = curLevel();
     S.lines += lines;
+    S.hProg += lines; S.sProg += lines;
     const center = burst(clearing);
     popText(center.x, center.y, pts, lines);
     bumpScore();
 
     hitStars.forEach(() => awardHelper('Star bonus! '));
-    const helpersEarned = Math.floor(S.lines / LINES_PER_HELPER) - Math.floor(prev / LINES_PER_HELPER);
-    for (let k = 0; k < helpersEarned; k++) awardHelper('');
-    const starsEarned = Math.floor(S.lines / LINES_PER_STAR) - Math.floor(prev / LINES_PER_STAR);
+    const cfp = LEVELS[prevLevel - 1];
+    while (S.hProg >= cfp.helper) { S.hProg -= cfp.helper; awardHelper(''); }
     const newStars = new Set();
-    for (let k = 0; k < starsEarned; k++) { const i = addStar(); if (i != null) newStars.add(i); }
+    while (S.sProg >= cfp.star) { S.sProg -= cfp.star; const i = addStar(cfp.plays); if (i != null) newStars.add(i); }
+    const lv = curLevel();
+    if (lv !== prevLevel) {
+      levelBanner(prevLevel, lv);
+      levelChanged = true;
+    }
 
     busy = true;
     const keepView = L.v;
@@ -524,14 +657,14 @@
     setTimeout(() => { busy = false; renderBoard(); refreshFit(); }, 380);
   }
 
-  function addStar() {
+  function addStar(plays) {
     const taken = new Set(S.stars.map(s => s.i));
     const options = [];
     for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) { const i = idx(r, c); if (!taken.has(i)) options.push(i); }
     if (!options.length) return null;
     const i = options[Math.floor(Math.random() * options.length)];
-    S.stars.push({ i, left: STAR_PLAYS });
-    toast('Star! Clear it within 5 plays for a helper');
+    S.stars.push({ i, left: plays });
+    toast(`Star! Clear it within ${plays} plays for a helper`);
     return i;
   }
 
@@ -551,6 +684,7 @@
     renderSlot(i);
     const newCur = el.querySelector('.cur .piece');
     const newNext = el.querySelector('.next .piece');
+    if (!from && newCur) newCur.classList.add('enter');
     if (from && newCur) {
       const to = newCur.getBoundingClientRect();
       const dx = (from.left + from.width / 2) - (to.left + to.width / 2);
@@ -564,7 +698,42 @@
     if (newNext) newNext.classList.add('enter');
   }
 
-  function afterMove() { renderHUD(); refreshFit(); checkState(); save(); }
+  // Pop-up at the top describing a Crazy-mode difficulty change
+  let bannerT;
+  function levelBanner(from, to) {
+    const b = LEVELS[to - 1], a = from ? LEVELS[from - 1] : null;
+    const items = [];
+    const ch = (label, x, y, fmt = v => v) => { if (!a) items.push(`${label}: <b>${fmt(y)}</b>`); else if (x !== y) items.push(`${label}: ${fmt(x)} → <b>${fmt(y)}</b>`); };
+    ch('Big pieces', a && a.big, b.big, v => v + '×');
+    ch('Next-piece previews', a && a.previews, b.previews);
+    ch('Helper every', a && a.helper, b.helper, v => v + ' lines');
+    ch('Stars every', a && a.star, b.star, v => v + ' lines');
+    ch('Star lasts', a && a.plays, b.plays, v => v + ' plays');
+    ch('Gray ring', a && a.ring, b.ring, v => v ? 'open' : 'closed');
+    ch('Single squares', a && a.single, b.single, v => v ? 'on' : 'off');
+    let head, tag;
+    if (!a) { head = 'Crazy mode'; tag = 'Gets harder every 10 lines'; }
+    else if (to > from) { head = 'Harder!'; tag = to === 10 ? 'Maximum difficulty' : `Next change in ${CRAZY_STEP} lines`; }
+    else { head = 'Reset — climb again'; tag = `Drops back to ${to}, then climbs to 10 again`; }
+    const forever = a && to === 10 && Math.floor(S.lines / CRAZY_STEP) >= CRAZY_SEQ.length - 1;
+    if (forever) tag = 'Locked at 10/10 from here on';
+    const el = $('lvlPop');
+    el.innerHTML = `<div class="lp-top"><span class="lp-lvl">${to}/10</span><div><strong>${head}</strong><small>${b.name} · ${tag}</small></div></div>
+      <ul>${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+    el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+    clearTimeout(bannerT); bannerT = setTimeout(() => el.classList.remove('show'), 4200);
+  }
+  $('lvlPop').addEventListener('click', () => $('lvlPop').classList.remove('show'));
+
+  let levelChanged = false;
+  function afterMove() {
+    if (levelChanged) {
+      levelChanged = false;
+      renderTray();
+      setTimeout(() => { if (!busy) renderBoard(); }, 420);
+    }
+    renderHUD(); refreshFit(); checkState(); save();
+  }
 
   function checkState() {
     if (S.over) return;
@@ -583,75 +752,166 @@
 
   // ---------- game over / scores ----------
   function recordScore(score) {
-    const prevBest = bestScore();
-    const entry = { score, date: Date.now() };
+    const prevBest = bestScore(S.mode);
+    const entry = { score, lines: S.lines, date: Date.now() };
     if (score > 0) {
-      const list = getScores();
+      const list = getScores(S.mode);
       list.push(entry);
       list.sort((a, b) => b.score - a.score || a.date - b.date);
-      store.set(K_SCORES, list.slice(0, 5));
+      store.set(kScores(S.mode), list.slice(0, 5));
     }
     return { isRecord: score > 0 && score > prevBest, entry };
   }
   function gameOver() {
     S.over = true;
     store.del(K_STATE);
-    store.set(K_HELPERS, S.helpers);
+    saveHelpers();
     const { isRecord, entry } = recordScore(S.score);
     renderHUD(); refreshFit();
     const kept = S.helpers.single + S.helpers.rotate + S.helpers.del;
     setTimeout(() => {
       openModal(`
         <h2>Game over</h2>
-        <p>No more pieces fit on the board.</p>
+        <p>${modeLabel(S.mode)}${S.mode === 'crazy' ? ` · reached ${curLevel()}/10` : ''}</p>
         ${isRecord ? '<div class="record">New record!</div>' : ''}
         <div class="big">${S.score.toLocaleString()}</div>
-        <p>${S.lines} line${S.lines === 1 ? '' : 's'} cleared${kept ? ` · ${kept} helper${kept === 1 ? '' : 's'} carried to next game` : ''}</p>
-        ${scoresHTML(entry.date)}
-        <button class="btn" data-act="new">Play again</button>`);
+        <p>${S.lines} line${S.lines === 1 ? '' : 's'} cleared${kept && S.mode !== 'crazy' ? ` · ${kept} helper${kept === 1 ? '' : 's'} saved for your next ${S.mode === 'crazy' ? 'Crazy' : 'Level ' + S.mode} game` : ''}</p>
+        ${scoresHTML(S.mode, entry.date)}
+        <div class="btns"><button class="btn ghostbtn" data-act="picker">Change difficulty</button><button class="btn" data-act="again">Play again</button></div>`, 'over');
     }, 700);
   }
-  function scoresHTML(highlightDate) {
-    const list = getScores();
-    if (!list.length) return '<p>No scores yet. Finish a game to set one.</p>';
+  function scoresHTML(mode, highlightDate) {
+    const list = getScores(mode);
+    if (!list.length) return '<p class="empty">No scores yet for this mode.</p>';
     return '<ol class="scores">' + list.map((s, i) => `
       <li class="${s.date === highlightDate ? 'me' : ''}">
         <span class="rk">${i + 1}</span>
         <span class="sc">${s.score.toLocaleString()}</span>
-        <span class="dt">${new Date(s.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+        <span class="dt">${s.lines != null ? s.lines + ' lines · ' : ''}${new Date(s.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
       </li>`).join('') + '</ol>';
+  }
+  function showScores(mode) {
+    const tabs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'crazy'].map(m =>
+      `<button class="tab${m === mode ? ' on' : ''}${m === 'crazy' ? ' crazy' : ''}" data-act="sv:${m}">${m === 'crazy' ? 'Crazy' : m}</button>`).join('');
+    openModal(`<h2>Top scores</h2><div class="tabs">${tabs}</div><p class="sub">${modeLabel(mode)}</p>${scoresHTML(mode)}
+      <div class="btns"><button class="btn" data-act="close">Close</button></div>`);
+  }
+
+  // ---------- difficulty picker ----------
+  let lastPickerOpts = {};
+  function openPicker(opts = {}) {
+    lastPickerOpts = opts;
+    const { canResume = false, canCancel = false } = opts;
+    const lv = LEVELS.map((L, k) => {
+      const m = k + 1, best = bestScore(m);
+      return `<button class="lvl" data-act="mode:${m}" style="--t:${k / 9}">
+        <b>${m}</b><span>${L.name}</span><small>${best ? 'Best ' + best.toLocaleString() : '—'}</small></button>`;
+    }).join('');
+    const cbest = bestScore('crazy');
+    const resume = canResume ? `<button class="btn resume" data-act="resume">Resume ${S.mode === 'crazy' ? 'Crazy mode' : 'Level ' + S.mode} · ${S.score.toLocaleString()} pts</button>` : '';
+    const warn = (canResume || canCancel) && S.score > 0 ? '<p class="sub">Starting a new game saves your current score.</p>' : '';
+    openModal(`<h2>Block<span style="color:var(--accent)">tet</span></h2>${resume}
+      <p class="sub">Choose a difficulty</p>
+      <div class="lvl-grid">${lv}</div>
+      <button class="crazy-btn" data-act="mode:crazy"><b>Crazy mode</b>
+        <span>Starts at 1 and gets harder every 10 lines. After 10, it drops back and climbs again, until it stays at 10.</span>
+        <small>${cbest ? 'Best ' + cbest.toLocaleString() : 'No score yet'}</small></button>
+      ${warn}
+      ${canCancel ? '<div class="btns"><button class="btn ghostbtn" data-act="close">Back to game</button></div>' : ''}`, canCancel ? 'picker' : 'locked');
+  }
+
+  // ---------- level details ----------
+  const BIG_NAMES = '5-long lines, 2×3 and 3×3 blocks, and diagonals';
+  const SMALL_NAMES = 'single squares, dominoes, 3-long lines and small corners';
+  function mixText(big) {
+    if (big === 1) return 'All 16 shapes are equally likely.';
+    const f = v => (Math.round(v * 100) / 100).toString().replace(/\.0+$/, '');
+    if (big < 1) return `Big pieces (${BIG_NAMES}) show up ${f(big)}× as often, and small pieces (${SMALL_NAMES}) ${f(1 / big)}× as often.`;
+    return `Big pieces (${BIG_NAMES}) show up ${f(big)}× as often, and small pieces (${SMALL_NAMES}) only ${f(1 / big)}× as often.`;
+  }
+  function settingRows(L, helperNote) {
+    const prev = { 3: 'You can see the next piece under all three rack pieces.',
+                   2: 'Only the left and right pieces show what comes next; the middle one is a surprise.',
+                   1: 'Only the middle piece shows what comes next; the other two are surprises.' }[L.previews];
+    const rows = [
+      ['Piece mix', mixText(L.big) + (L.single ? '' : ' Single squares never appear as random pieces.')],
+      ['Previews', prev],
+      ['Gray ring', L.ring ? 'Open. Pieces can hang one square past the edge into the gray ring, as long as part of the piece is on the board.'
+                           : 'Closed. Every piece must fit completely inside the 10×10 board.'],
+      ['Helpers', `Earn a random helper (Square, Rotate or Delete) every ${L.helper} lines. ${helperNote}`],
+      ['Stars', `A star appears every ${L.star} lines. Clear a row or column through it within ${L.plays} plays to win a bonus helper.`]
+    ];
+    return '<dl class="settings">' + rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('') + '</dl>';
+  }
+  function meter(n) {
+    return `<div class="meter" aria-label="Difficulty ${n} of 10">${Array.from({ length: 10 }, (_, k) =>
+      `<i class="${k < n ? 'on' : ''}" style="--t:${k / 9}"></i>`).join('')}</div>`;
+  }
+  function showLevelInfo(m) {
+    const best = bestScore(m);
+    const bestTxt = best ? `Your best: <b>${best.toLocaleString()}</b>` : 'No score yet';
+    let body;
+    if (m === 'crazy') {
+      body = `<h2>Crazy mode</h2>${meter(1)}
+        <p class="sub">Starts at level 1 and gets one level harder every ${CRAZY_STEP} lines.</p>
+        <dl class="settings">
+          <dt>How it climbs</dt><dd>1 → 10, then drops to 2 and climbs to 10 again, then 3 → 10, and so on. Once a drop would land on 10, it stays at 10 for good (after ${CRAZY_SEQ.length * CRAZY_STEP - CRAZY_STEP} lines).</dd>
+          <dt>Changes as you go</dt><dd>Each level brings its own piece mix, previews, gray ring, helper rate and star timing. A pop-up at the top tells you what changed.</dd>
+          <dt>Helpers</dt><dd>You start with none. Helpers you earn can be used during this game but aren't saved afterward.</dd>
+          <dt>Strategy</dt><dd>It's built to end. Score big by clearing several rows and columns at once; points are multiplied by the number of lines cleared together.</dd>
+        </dl>
+        <details><summary>Level 1 starting settings</summary>${settingRows(LEVELS[0], 'Helpers earned in Crazy mode are not saved.')}</details>`;
+    } else {
+      const L = LEVELS[m - 1], h = savedHelpers(m), n = h.single + h.rotate + h.del;
+      const note = n ? `You have ${n} saved for this level (${h.single} Square, ${h.rotate} Rotate, ${h.del} Delete).` : 'Unused helpers are saved for your next game at this level.';
+      body = `<h2>Level ${m} · ${L.name}</h2>${meter(m)}${settingRows(L, note)}`;
+    }
+    openModal(`${body}<p class="sub">${bestTxt}</p>
+      <div class="btns"><button class="btn ghostbtn" data-act="back">Back</button><button class="btn start" data-act="start:${m}">Start</button></div>`,
+      lastPickerOpts.canCancel ? 'picker' : 'locked');
   }
 
   // ---------- modal ----------
   const modal = $('modal'), modalCard = $('modalCard');
-  function openModal(html) { modalCard.innerHTML = html; modal.classList.remove('hidden'); }
-  function closeModal() { modal.classList.add('hidden'); }
+  let modalKind = '';
+  function openModal(html, kind = '') { modalKind = kind; modalCard.innerHTML = html; modal.classList.remove('hidden'); }
+  function closeModal() { modal.classList.add('hidden'); modalKind = ''; }
   modal.addEventListener('click', e => {
-    if (e.target === modal) { if (!S.over) closeModal(); return; }
+    if (e.target === modal) { if (modalKind !== 'locked' && modalKind !== 'over') closeModal(); return; }
     const act = e.target.closest('[data-act]');
     if (!act) return;
     const a = act.dataset.act;
     if (a === 'close') closeModal();
-    if (a === 'new') { closeModal(); newGame(); }
-    if (a === 'abandon') { recordScore(S.score); closeModal(); newGame(); }
+    if (a === 'again') { closeModal(); newGame(S.mode); }
+    if (a === 'picker') openPicker();
+    if (a === 'resume') closeModal();
+    if (a === 'abandon') { recordScore(S.score); S.score = 0; store.del(K_STATE); openPicker(); }
+    if (a.startsWith('mode:')) showLevelInfo(a.slice(5) === 'crazy' ? 'crazy' : +a.slice(5));
+    if (a === 'back') openPicker(lastPickerOpts);
+    if (a.startsWith('start:')) {
+      const m = a.slice(6) === 'crazy' ? 'crazy' : +a.slice(6);
+      if (!S.over && S.score > 0) recordScore(S.score);
+      closeModal(); newGame(m);
+    }
+    if (a.startsWith('sv:')) showScores(a.slice(3) === 'crazy' ? 'crazy' : +a.slice(3));
     if (a.startsWith('rot')) { closeModal(); doRotate(+a.slice(3)); }
   });
-  $('scoreBtn').addEventListener('click', () => {
-    openModal(`<h2>Top scores</h2>${scoresHTML()}<div class="btns"><button class="btn" data-act="close">Close</button></div>`);
-  });
+  $('scoreBtn').addEventListener('click', () => showScores(S.mode));
   $('newBtn').addEventListener('click', () => {
-    if (S.over || S.score === 0) { newGame(); return; }
-    openModal(`<h2>New game?</h2><p>Your current score of <b>${S.score.toLocaleString()}</b> will be saved to your scores. Unused helpers carry over.</p>
+    if (S.over) { openPicker(); return; }
+    if (S.score === 0) { openPicker({ canCancel: true }); return; }
+    openModal(`<h2>New game?</h2><p>Your current score of <b>${S.score.toLocaleString()}</b> will be saved to your ${S.mode === 'crazy' ? 'Crazy mode' : 'Level ' + S.mode} scores. Unused helpers stay with this mode.</p>
       <div class="btns"><button class="btn ghostbtn" data-act="close">Keep playing</button><button class="btn" data-act="abandon">New game</button></div>`);
   });
 
-  function newGame() {
-    const helpers = S ? { ...S.helpers } : savedHelpers();
-    S = freshState(helpers);
+  function newGame(mode) {
+    saveHelpers();
+    S = freshState(mode);
     setDeleteMode(false);
     $('status').classList.remove('show');
     renderAll();
     save();
+    if (mode === 'crazy') levelBanner(null, 1);
   }
 
   // ---------- helpers ----------
@@ -830,15 +1090,76 @@
     S = saved;
     S.helpers = Object.assign({ single: 0, rotate: 0, del: 0 }, S.helpers);
     S.stars = S.stars || [];
+    if (S.mode == null) S.mode = 3;               // games saved before levels existed
+    if (S.hProg == null) S.hProg = S.lines % 25;
+    if (S.sProg == null) S.sProg = S.lines % 10;
     uid = 1 + Math.max(0, ...S.slots.flatMap(s => [s.cur.id, s.next.id]));
     renderAll();
-  } else newGame();
-
-  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    openPicker({ canResume: true });
+  } else {
+    S = freshState(3); S.over = true;             // placeholder board behind the picker
+    renderAll();
+    openPicker();
   }
 
-  window.__bt = { get S() { return S; }, idx, canPlace, anyFit, render: renderAll, renderBoard, place, afterMove, addStar };
+  // ---------- updates ----------
+  // On load and whenever the app becomes visible again, compare this build's version with
+  // version.json on the server and ask the service worker to look for a new build.
+  let swReg = null;
+  const updateBtn = $('updateBtn');
+  function showUpdate() { updateBtn.hidden = false; }
+  async function checkForUpdate() {
+    let newer = false;
+    try {
+      const r = await fetch('version.json?ts=' + Date.now(), { cache: 'no-store' });
+      if (r.ok) newer = (await r.json()).version !== APP_VERSION;
+    } catch {}
+    if (swReg) {
+      try { await swReg.update(); } catch {}
+      if (swReg.waiting && navigator.serviceWorker.controller) newer = true;
+    }
+    if (newer) showUpdate();
+  }
+  function waitForWaiting(reg, ms) {
+    return new Promise(resolve => {
+      if (reg.waiting) return resolve(reg.waiting);
+      const t = setTimeout(() => resolve(null), ms);
+      const watch = w => w && w.addEventListener('statechange', () => { if (w.state === 'installed') { clearTimeout(t); resolve(reg.waiting || w); } });
+      watch(reg.installing);
+      reg.addEventListener('updatefound', () => watch(reg.installing));
+    });
+  }
+  updateBtn.addEventListener('click', async () => {
+    updateBtn.querySelector('span').textContent = 'Updating…';
+    if (S) save();
+    if (swReg && navigator.serviceWorker.controller) {
+      try { await swReg.update(); } catch {}
+      const w = await waitForWaiting(swReg, 8000);
+      if (w) {
+        navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
+        w.postMessage('SKIP_WAITING');
+        return;
+      }
+    }
+    location.reload();
+  });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkForUpdate(); });
+  window.addEventListener('focus', () => checkForUpdate());
+
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        swReg = reg;
+        reg.addEventListener('updatefound', () => {
+          const w = reg.installing;
+          w && w.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) showUpdate(); });
+        });
+        checkForUpdate();
+      }).catch(() => checkForUpdate());
+    });
+  } else window.addEventListener('load', () => checkForUpdate());
+
+  window.__bt = { get S() { return S; }, level: () => curLevel(), idx, canPlace, anyFit, render: renderAll, renderBoard, place, afterMove, addStar };
 })();
 </script>
 </body>
